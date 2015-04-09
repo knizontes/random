@@ -1,0 +1,53 @@
+This is BibTeX, Version 0.99d (TeX Live 2013/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: LA2014_Paracone.aux
+The style file: alpha.bst
+Database file #1: biblio.bib
+Name 1 in "Patrick Lacharme, Andrea Röck, Vincent Strubel, and Marion Videau" has a comma at the end for entry lach
+while executing---line 1185 of file alpha.bst
+Name 1 in "Patrick Lacharme, Andrea Röck, Vincent Strubel, and Marion Videau" has a comma at the end for entry lach
+while executing---line 1185 of file alpha.bst
+Name 1 in "Patrick Lacharme, Andrea Röck, Vincent Strubel, and Marion Videau" has a comma at the end for entry lach
+while executing---line 1250 of file alpha.bst
+You've used 5 entries,
+            2543 wiz_defined-function locations,
+            579 strings with 5130 characters,
+and the built_in function-call counts, 1496 in all, are:
+= -- 141
+> -- 73
+< -- 2
++ -- 22
+- -- 22
+* -- 79
+:= -- 259
+add.period$ -- 12
+call.type$ -- 5
+change.case$ -- 26
+chr.to.int$ -- 5
+cite$ -- 5
+duplicate$ -- 58
+empty$ -- 116
+format.name$ -- 29
+if$ -- 303
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 2
+newline$ -- 25
+num.names$ -- 15
+pop$ -- 40
+preamble$ -- 1
+purify$ -- 33
+quote$ -- 0
+skip$ -- 63
+stack$ -- 0
+substring$ -- 35
+swap$ -- 5
+text.length$ -- 2
+text.prefix$ -- 2
+top$ -- 0
+type$ -- 40
+warning$ -- 0
+while$ -- 13
+width$ -- 6
+write$ -- 56
+(There were 3 error messages)

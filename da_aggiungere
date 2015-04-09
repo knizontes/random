@@ -1,0 +1,77 @@
+o
+
+input interfaces --- random.c 122 157
+add_*_randomness
+stima della randomicità dell'inpu specificot
+
+o script urandom debian
+
+o linux minor number (8,9)
+
+o dimensione dell'output pool: 32 words --- 280
+
+o La mixing function è una "buona funzione hash non crittografica"
+inteso nel senso di evitare le collisioni tra gli input e la loro mappatura nel seed
+Il fatto che un attaccante possa iniettare degli input costruiti ad hoc per ottenere uno specifico stato interno non comporta nulla perché l'entropia per tali input non viene conteggiata (se l'attaccante inietta input via spazio utente, ma cosa succede se corrompe e controlla i driver? e/o gli interrupt? altrimenti, che senso ha parlare della capacità di scrivere sul device file se gli interrupt e i timer stessi aggiornano lo stato interno?)
+Anche se ogni addizione (applicazione della mixing function) è reversibile (dallo stato finale + input si può ottenere lo stato iniziale), se l'attaccante è incerto sullo stato corrente e vi apporta delle modifiche non migliora la propria incertezza (non potendo "mai" forzare collisioni!)
+
+o Mixing function notes
+They suggest a slight change to the generator
+ * polynomial which improves the resulting TGFSR polynomial to be
+ * irreducible, which we have made here
+riferito all'articolo di Lacharm
+
+o random_read_wait e random_write_wait
+
+o entropy store
+
+
+o poolinfo e poolinfo_table
+
+o mix_pool_bytes
+Quando viene usata mix_pool e quando _mix_pool?
+
+o Fai una mappa delle chiamate a funzioni a partire dai simboli esportati
+
+o simboli esportati
+	1. add_device_randomness
+	2. add_input_randomness
+	3. get_random_bytes
+	4. get_random_bytes_arch
+	5. generate_random_uuid
+	6. get_random_int
+
+o Accredito di entropia
+L'accredito di entropia ha un approccio lineare rispetto al debito 
+(produzione di output), asintotico rispetto al credito (aggiunta
+di entropia)
+
+L'entropia è calcolata come: 
+entropy <- entropy + (pool_size - entropy) * (1 - exp(-add_entropy/pool_size))
+
+ovvero viene aggiunta alla pool la quantità (pool_size - entropy) * (1 - exp(-add_entropy/pool_size)), ovvero la differenza tra il size della pool e l'entropy counter moltiplicato per un valore che tende asintoticamente a uno all'aumentare dei bit che si vogliono aggiungere.
+Il calcolo dell'esponenziale è approssimato considerando che per 
+add_entropy <= pool_size/2 --->
+    (1 - exp(-add_entropy/pool_size)) >=  (add_entropy/pool_size)*0.7869...
+dove l'esponenziale è approssimato con 3/4*add_entropy/pool_size
+e 3/4 = 0.75 è minore di 0.7869 (che è la soluzione di (1-exp(-x))/x per x=0.5 (ovvero add_entropy = 1/2 pool size)
+Descrivere nel dettaglio l'algoritmo
+
+o Entropy count
+
+l'entropy count è espresso in ottavi di bit
+xfer_secondary_pool modifica l'entropy count di alcuna fra input e output pool?
+
+o export_symbol rimossi
+
+Nel 2004 è stata rimossa l'esportazione del simbolo add_interrupt_randomness, che è correntemente chiamato solo da kernel/irq/handle.c
+Stesso destino è stato riservato da block/blk-core.c
+Il fatto che il simbolo non venga esportato non significa che le funzioni non siano utilizzate, quanto piuttosto che i simboli vengono utilizzati SOLO NEL CORE DEL KERNEL.
+Questo è più comprensibile per gli interrupt, mentre il sorgente che inietta entropia dai dischi è block/blk-core.c 
+
+o Account
+
+ritorna il massimo numero di bytes che possono essere estratti dalla pool e 
+sveglia gli eventuali thread in attesa in scrittura.
+
+o Il fast mixing è reversibile? Sempre? 

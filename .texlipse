@@ -1,0 +1,14 @@
+#TeXlipse project settings
+#Thu Jul 10 18:08:56 CEST 2014
+markTmpDer=true
+builderNum=2
+outputDir=
+makeIndSty=
+bibrefDir=
+outputFormat=pdf
+tempDir=tmp
+mainTexFile=LA2014_Paracone.tex
+outputFile=LA2014_Paracone.pdf
+langSpell=it
+markDer=true
+srcDir=

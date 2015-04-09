@@ -1,0 +1,25 @@
+0. Panoramica
+
+A. Struttura generale
+	1. notazione
+	2. stato interno
+	3. flusso di input-output
+B. Input
+	1. entropy input
+	2. mixing function e stima di entropia
+	3. fast mixing
+	4. inizializzazione del sistema
+	5. thread in attesa						[!!!]
+
+C. output
+	1. sha1
+	2. estrazione hash dalle pool (tutte le interfacce)
+	2. xfer_...
+	3. interfacce output
+
+D. Sicurezza 
+
+E. Confronto con gli articoli
+	1. modifiche adottate tra gli articoli
+	2. cavolata asserita dal secondo articolo sull'esposizione dell'interfaccia hw solo verso lo user space. NON È VERO! EXPORT_SYMBOL(get_random_bytes_arch);
+E. codice commentato

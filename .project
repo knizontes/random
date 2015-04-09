@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>LA2014_Paracone</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>net.sourceforge.texlipse.builder.TexlipseBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>net.sourceforge.texlipse.builder.TexlipseNature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>biblio.bib</name>
+			<type>1</type>
+			<location>/usr/share/texlive/texmf-dist/bibtex/bib/msc/biblio.bib</location>
+		</link>
+	</linkedResources>
+</projectDescription>

@@ -1,0 +1,28 @@
+\begin{thebibliography}{ZGR06}
+
+\bibitem[Ker15]{kerr}
+Michael Kerrisk.
+\newblock \url{http://man7.org/linux/man-pages/man4/random.4.html} Random(4) -
+  Linux Programmer's Manual, The Linux man-pages project, 2015.
+
+\bibitem[MT14]{mack}
+Matt Mackall and Theodore Ts’o.
+\newblock random.c – a strong random number generator, june 2014, 2014.
+
+\bibitem[PLV12]{lach}
+Vincent~Strubel Patrick~Lacharme, Andrea~Röck and Marion Videau.
+\newblock "the linux pseudorandom number generator revisited,
+  \url{http://eprint.iacr.org/2012/251.pdf}".
+\newblock {\em IACR Cryptology ePrint Archive}, 2012.
+
+\bibitem[Ts'12]{tso}
+Theodore Ts'o.
+\newblock \url{https://lkml.org/lkml/2012/7/17/650} Linux Kernel Mailing List
+  archive, 2012.
+
+\bibitem[ZGR06]{gutt}
+Benny~Pinkas Zvi~Gutterman and Tzachy Reinman.
+\newblock Analysis of the linux random number generator.
+\newblock {\em IACR Cryptology ePrint Archive}, 2006.
+
+\end{thebibliography}
