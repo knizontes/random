@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.7.10)  9 APR 2015 12:09
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.7.10)  9 APR 2015 17:58
 entering extended mode
  restricted \write18 enabled.
  Source specials enabled.
@@ -614,14 +614,14 @@ Underfull \hbox (badness 10000) in paragraph at lines 415--418
 
  []
 
-[7] [8] [9] [10] [11] [12] [13] [14]
-Overfull \hbox (7.29219pt too wide) in paragraph at lines 1000--1019
+[7] [8] [9] [10] [11] [12] [13] [14] [15]
+Overfull \hbox (7.29219pt too wide) in paragraph at lines 1031--1050
  \OT1/cmr/bx/n/10 Let-tu-ra da /de-v/-ran-dom:[] []\OT1/cmr/m/n/10 La fun-zio-n
 e ad-det-ta al-l'o-pe-ra-zio-ne di let-tu-ra su []\OT1/cmtt/m/n/10 /dev/random 
 \OT1/cmr/m/n/10 ^^Re []\OT1/cmtt/m/n/10 random_read()\OT1/cmr/m/n/10 ,
  []
 
-[15] [16] (./LA2014_Paracone.bbl
+[16] (./LA2014_Paracone.bbl
 ! Undefined control sequence.
 l.5 \newblock \url
                   {http://man7.org/linux/man-pages/man4/random.4.html} Rando...
@@ -658,10 +658,10 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 14110 strings out of 495017
- 247887 string characters out of 6181021
- 316617 words of memory out of 5000000
- 17042 multiletter control sequences out of 15000+600000
+ 14113 strings out of 495017
+ 247924 string characters out of 6181021
+ 316656 words of memory out of 5000000
+ 17045 multiletter control sequences out of 15000+600000
  10271 words of font info for 36 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  62i,6n,63p,801b,481s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -683,7 +683,7 @@ e/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf
 -dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/
 fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/
 type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on LA2014_Paracone.pdf (17 pages, 279724 bytes).
+Output written on LA2014_Paracone.pdf (17 pages, 281543 bytes).
 PDF statistics:
  138 PDF objects out of 1000 (max. 8388607)
  99 compressed objects within 1 object stream

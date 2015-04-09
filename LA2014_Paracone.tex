@@ -631,7 +631,7 @@ ha preso forma l'implementazione attuale.
  Durante la chiamata a \verb+add_timer_randomness()+ viene disattivata la
  \emph{preemption}. 
  
- \subsubsection{L'accredito di entropia}
+ \subsubsection{L'accredito di entropia}\label{credit}
  L'accredito di entropia presso le \emph{pool} avviene tramite le routine
  \verb+credit_entropy_bits()+ e \newline{}\verb+credit_entropy_bits_safe()+.
  Quest'ultima si differenzia dalla prima soltanto per un controllo sulla correttezza del
@@ -881,7 +881,36 @@ ha preso forma l'implementazione attuale.
  \end{enumerate}
  
  \subsection{Il trasferimento di entropia}\label{trasferimentoentropia}
-
+ Il LRNG implementa alcuni meccanismi atti a bilanciare la quantità di
+ entropia presente al suo interno e garantire che non venga
+ sprecata. Perché ciò possa accedere è necessario poter trasferire entropia tra
+ le \emph{pool}.
+  
+ \paragraph{}Per impedire che l'\emph{input pool} sia
+ ``prosciugata'' inutilmente, le \emph{output pool} rimangono prive di entropia
+ fino al momento in cui viene loro richiesto di produrre un output: solo allora
+ vengono trasferiti bytes di entropia verso la
+ \emph{pool} che ne ha bisogno.
+ Oppure può succedere, al contrario, che il sistema debba accumulare tanta
+ entropia da tendere a saturare l'\emph{input pool}: poiché abbiamo visto come
+ il meccanismo di accredito di entropia (descritto in \ref{credit}) incrementi
+ in modo asintotico gli \emph{entropy counter}, è ragionevole pensare che se
+ l'\emph{input pool} è sufficientemente ``piena'' sia conveniente ``stipare''
+ entropia anche presso le \emph{output pool}.
+ 
+ \paragraph{}In entrambi i casi è necessario trasferire entropia dalla
+ \emph{intput pool} ad una \emph{pool} secondaria: questo compito è assolto
+ dalla routine \verb+xfer_secondary_pool()+.
+ 
+ 
+ \subsubsection{Dall'\emph{input pool} alle \emph{output
+ pool}}\label{trasf_input_output}
+ Quando viene invocata \verb+xfer_secondary_pool()+ kkk
+ 
+ 
+ 
+ \subsubsection{L'accounting di entropia}\label{account}
+ 
  
  \subsection{La produzione dell'output}\label{produzioneoutput}
 Nella sezione \ref{interfacceoutput} abbiamo distinto le interfacce di output
@@ -889,6 +918,8 @@ tra quelle esportate verso lo spazio kernel e verso lo spazio utente (i device
 file \verb+/dev/random+ e \verb+/dev/urandom+). Analizziamo
 l'output del LRNG mantenendo questa distinzione. Le pool interessate a questo
 livello sono le \emph{output pool}.
+
+
 
 \subsubsection{Output nello spazio kernel}\label{kerneloutput}
 Tutte le routine esportate verso lo spazio kernel (\verb+get_random_bytes()+,
@@ -1034,6 +1065,7 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
  \verb+urandom_read()+, ma anche da come cambia il comportamento delle routine
  \verb+extract_entropy_user()+ e \verb+account()+ in funzione delle \emph{pool}
  su cui vengono chiamate.
+ 
   \paragraph{} In \verb+random_read() extract_entropy_user()+ viene chiamata sulla
  \emph{blocking pool}, prova a trasferire nel buffer dello spazio utente il
  numero di bytes richiesto e produce un valore di ritorno n che può essere:
@@ -1058,21 +1090,22 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
    \item un codice di errore ($< 0$) nel caso il flusso di esecuzione
    dell'estrazione si sia interrotto per altri motivi.
  \end{enumerate}
+ 
  \paragraph{} Quando \verb+extract_entropy_user()+ viene chiamata sulla
- \emph{nonblocking pool} in \verb+urandom_read()+ si comporta in modo diverso:
+ \emph{nonblocking pool} in \verb+urandom_read()+, si comporta in modo diverso:
  in questo caso infatti essa copia nel buffer dello spazio utente esattamente
  il numero di bytes randomici richiesti a prescindere da quanti bytes sono
  conteggiati negli \emph{entropy count} dell'\emph{input pool} e della 
- \emph{nonblocking pool}. 
- 
- 
+ \emph{nonblocking pool}. Questo è possibile per come la routine
+ \verb+account()+ (\ref{account}) su cui si basa \verb+extract_entropy_user()+,
+ oltre ad aggiornare l'\emph{entropy counter} distingue a sua volta tra
+ \emph{pool} bloccanti e non bloccante ritornando nel primo caso con il numero
+ di bytes di entropia estraibili e nel secondo con il numero stesso di
+ bytes richiesti. In questo modo \verb+extract_entropy_user()+, chiamata sulla
+ \emph{nonblocking pool}, preleva da essa un hash esattamente della dimensione
+ desiderata ignorando la quantità di entropia che contiene.
  
   
- 
- 
- 
- 
- 
 
  \section{Sicurezza nel LRNG}\label{sicurezza}
  \section{Cos'è cambiato?}
