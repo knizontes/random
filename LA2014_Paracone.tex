@@ -725,7 +725,9 @@ ha preso forma l'implementazione attuale.
          alternatamente la \emph{nonblocking pool} e la \emph{blocking pool}
          perché vengano trasferiti, dalla \emph{input pool} presso una di esse,
          fino a 8 bytes di entropia. Non viene schedulato nulla se la
-         \emph{output pool} selezionata è già satura per almeno il 75\%.
+         \emph{output pool} selezionata è già satura per almeno il 75\%. Questo
+         meccanismo è alla base del bilanciamento dell'entropia interna, come
+         vedremo più avanti nella sezione \ref{bilanciamento}.
        \end{enumerate}
    
    \end{enumerate}
@@ -905,11 +907,109 @@ ha preso forma l'implementazione attuale.
  
  \subsubsection{Dall'\emph{input pool} alle \emph{output
  pool}}\label{trasf_input_output}
- Quando viene invocata \verb+xfer_secondary_pool()+ kkk
+ Vediamo in questo paragrafo come opera \verb+xfer_secondary_pool()+.
  
+ \paragraph{Idempotenza verso \emph{nonblocking pool}:}Quando viene invocata,
+ \verb+xfer_secondary_pool()+ controlla per prima cosa se è stato richiesto un
+ trasferimento di entropia verso la \emph{nonblocking pool}: se questa è già
+ stata aggiornata negli ultimi 60 secondi, la funzione ritorna senza operare
+ alcun effetto. Questo meccanismo di fatto implementa l'idempotenza verso
+ accessi frequenti e consecutivi alle interfacce della \emph{pool} non
+ bloccante ed è immediato convincersi della sua necessità: un qualunque processo
+ (o più processi concorrenti), sia esso nello spazio
+ kernel o nello spazio utente, che faccia richieste di numeri randomici di
+ qualità inferiore ad un tasso relativamente sostenuto potrebbe esaurire
+ velocemente l'entropia accumulata nel generatore e conseguentemente bloccare i
+ processi dello spazio utente che invece necessitano di output altamente
+ affidabili. 
  
+ \paragraph{Controllo sulla disponibilità di entropia corrente:} Per evitare
+ che vengano tolti bytes di entropia dalla \emph{input pool} la routine
+ controlla, prima di trasferire effettivamente i bytes tramite
+ \verb+_xfer_entropy_pool()+, che nella \emph{pool} corrente vi sia meno
+ entropia di quella richiesta. \\Continuiamo la descrizione di
+ \verb+xfer_entropy_pool()+ attraverso quella di \verb+_xfer_entropy_pool()+.
+ 
+ \paragraph{\textunderscore{}xfer\textunderscore{}entropy\textunderscore{}pool():}
+ Questa è la routine che si occupa effettivamente del trasferimento di bytes di
+ entropia dalla \emph{input pool}. Oltre che essere estesa da
+ \verb+xfer_entropy_pool()+, viene invocata in modo diretto dalla routine per il
+ riequilibrio dell'entropia \verb+push_to_pool+ (che
+ vedremo in \ref{bilanciamento}).\\
+ La routine prende le mosse dall'inizializzazione delle variabili che
+ definiscono l'upper e il lower bound dell'entropia trasferibile, stabilendo che
+ debbano essere trasferiti non meno di 8 bytes di entropia (corrispondenti alla
+ soglia di attivazione per i processi sospesi nella lettura di
+ \verb+/dev/random+) e non più di 128 bytes (pari alla dimensione massima di
+ una \emph{pool} di output).\\
+ Le operazioni successive sono naturalmente conseguenti: 
+ \begin{enumerate}
+   \item viene estratto un buffer dalla \emph{input pool} con le caratteristiche
+   sopra citate attraverso la chiamata \verb+extract_entropy()+ (descritta più
+   avanti in \ref{kerneloutput});
+   \item viene effettuato il mixing del buffer così estratto attraverso
+   \verb+mix_pool_bytes()+ (già descritta nella sezione
+   \ref{mixingfunction} sulla \emph{mixing function});
+   \item viene aggiornato l'\emph{entropy counter} via
+   \verb+credit_entropy_bits()+ (vista in \ref{credit}).
+ \end{enumerate}
+ 
+ \subsubsection{Il bilanciamento dell'entropia} \label{bilanciamento}
+ Alla fine della sezione \ref{credit} sull'accredito di entropia abbiamo
+ descritto il meccanismo per cui, se l'\emph{input pool} ha un entropia
+ superiore ai $7/8$ della sua capacità, viene trasferita parte di quest'entropia
+ (8 bytes per volta) alternativamente in una delle due \emph{pool} secondarie se
+ questa non è già impegnata per oltre il $75\%$ della propria capacità.
+ \paragraph{}La routine che viene schedulata da \verb+credit_entropy_bits()+ per
+ bilanciare l'entropia in eccesso è \verb+push_to_pool()+, puntata
+ dal campo \verb+push_work+ della struttura \verb+entorpy_store+ che modella le
+ \emph{pool} di output. \verb+push_to_pool()+ non fa altro che invocare
+ \verb+_xfer_secondary_pool+ per trasferire gli 8 bytes di entropia dalla
+ \emph{input pool} alla \emph{outpul pool}.
  
  \subsubsection{L'accounting di entropia}\label{account}
+ L'accounting nel LRNG è l'operazione che valuta quanti bytes possono essere
+ effettivamente prelevati da una pool a fronte di una richiesta di
+ una quantità pari a \verb+nbytes+.
+ Il modo in cui viene compiuta questa misura cambia a seconda che la
+ \emph{pool} sia bloccante o non bloccante: nel primo caso infatti viene
+ restituito il minimo tra i bytes di entropia disponibili per l'estrazione e
+ \verb+nbytes+, nel secondo il valore di ritorno è lo stesso \verb+nbytes+.
+ In entrambi i casi comunque l'\emph{entropy counter} della pool viene
+ aggiornato con il valore corretto. La routine addetta all'operazione di accounting è
+ \verb+account()+.
+ 
+ \paragraph{account():} Alla routine viene passato come parametro, oltre
+ all'intero \verb+nbytes+, anche i valori \verb+min+, che definisce il minimo valore di
+ entropia che deve essere estratto, e \verb+reserved+, che indica la quantità
+ minima di bytes di entropia che devono essere lasciati nella \emph{pool} dopo
+ l'estrazione. \\
+ Diamo un breve descrizione degli step principali compiuti dalla funzione:
+ \begin{enumerate}
+   \item nel caso in cui la pool sia bloccante, la quantità di bytes estraibile
+   viene calcolata come la differenza tra i bytes della \emph{pool} e i bytes
+   \verb+reserved+ che devono essere lasciati ``per terra'';
+   \item viene calcolato il nuovo valore dell'\emph{entropy counter} della
+   \emph{pool} garantendo che venga rispettato il vincolo su \verb+reserved+;
+   \item se l'\emph{entopy counter} letto all'inizio della routine è stato
+   modificato da un altro thread prima che il thread corrente vi abbia eseguito
+   il proprio aggiornamento, occorre fare un nuovo tentativo per operare
+   l'accounting e viene eseguito un \emph{goto} al punto 1;
+   \item se il numero (intero) di bit  dell'\emph{entropy counter} cade sotto
+   la soglia \verb+random_write_wakeup_thresh+ (pari a 28 word) viene
+   impostato a 1 lo switch \verb+wakeup_write+: questo ha lo scopo di abilitare 
+   la scrittura per i processi che invocano la chiamata di sistema
+   \verb+poll+ sui device files \verb+/dev/random+ e \verb+/dev/urandom+;
+   \item se \verb+wakeup_write+ è stato impostato manda un segnale di wake up
+   alla \emph{wait queue} \verb+random_write_wait+: la conseguenza è
+   l'esecuzione della routine \verb+random_poll()+ che aggiorna la \emph{poll
+   mask} per i device file \verb+random+ e \verb+urandom+;
+   \item ritorna con il numero di bytes che è possibile prelevare.
+ \end{enumerate} 
+ Da notare che durante tutta la sua esecuzione, la funzione di accounting opera
+ avendo disabilitato le \emph{interrupt request} per poi ripristinarne lo stato
+ al termine della sua esecuzione, attraverso le chiamate a
+ \verb+spin_lock_irqsave()+ e \verb+spin_unlock_irqrestore()+.
  
  
  \subsection{La produzione dell'output}\label{produzioneoutput}
