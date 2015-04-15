@@ -228,7 +228,7 @@ e aggiungono entropia al generatore in modo asincrono e
  output via SHA-1 a partire dal proprio stato interno. Notiamo come i bytes
  prodotti in modo non bloccante siano comunque idonei per la grande maggioranza
  delle applicazioni: un attaccante in possesso di vecchi output dovrebbe
- aver effettuato una crittanalisi di SHA-1 che gli consenta di prevedere futuri
+ aver effettuato una crittoanalisi di SHA-1 che gli consenta di prevedere futuri
  output a partire da vecchi output (condizione sufficiente nel solo caso di
  esaurimento dell'entropia e assenza di \emph{entropy input}) mentre ad oggi si
  ritiene (anche se non è stato dimostrato) che una crittanalisi di questo genere
@@ -507,7 +507,7 @@ vediamo ora come interagiscono fra di loro.
  In particolare fa uso della struttura \verb+timer_rand_state+ in
  \verb+disk->random+ per l'aggiunta e la stima dell'entropia.
  
- \subsection{La Stima dell'Entropia}
+ \subsection{La Stima dell'Entropia}\label{stima}
 La stima dell'entropia nel LRNG ha come obiettivo di quantificare
 l'impredicibilità su cui si può fare affidamento al momento della generazione
 di bytes. La stima dell'entropia è un'attività centrale per il LRNG per
@@ -536,14 +536,14 @@ riguardo agli altri valori (passati e futuri) prodotti.
 \begin{enumerate}
   \item per la stima dei bit di entropia per \emph{entropy input};
   \item per l'accredito presso gli \emph{entropy counter} dei bit di entropia 
-  durante i trasferimenti di entropia da e verso le pool.
+  derivati dagli \emph{entropy input}.
 \end{enumerate}
 Prendendo spunto da \cite{lach} (sez. 2.3.2), ci riferiremo col termine di
 \textbf{\emph{entropy estimator}} al complesso di entrambi i meccanismi.
 
-\subsubsection{Assunzioni e vincoli per l'\emph{entropy estimator}}
-Prima di analizzare com'è implementato l'\emph{entropy estimator}, diamo
-ragione brevemente delle assunzioni e dei vincoli sugli \emph{entropy
+\subsubsection{Assunzioni e vincoli per l'\emph{entropy
+estimator}}\label{vincoliStima} Prima di analizzare com'è implementato
+l'\emph{entropy estimator}, diamo ragione brevemente delle assunzioni e dei vincoli sugli \emph{entropy
 input}, individuati nell'articolo di Lacharme \cite{lach}, a partire dai quali
 ha preso forma l'implementazione attuale.
 \paragraph{Assunzioni:}
@@ -571,9 +571,10 @@ ha preso forma l'implementazione attuale.
   dell'entropia successivamente all'arrivo di un set di input.
 \end{itemize}
  
- \subsubsection{La stima dell'entropia per \emph{entropy input}}
- A seconda delle sorgenti di entropia cambia il modo di stimare
- l'impredicibilità introdotta dallo specifico \emph{entropy input}.
+ \subsubsection{La stima dell'entropia per \emph{entropy
+ input}}\label{stimaInput} 
+ A seconda delle sorgenti di entropia cambia il modo
+ di stimare l'impredicibilità introdotta dallo specifico \emph{entropy input}.
  In ciascuna delle interfacce descritte in \ref{interfacceinput} è implementato
  il meccanismo particolare per l'input in gestione. Specifichiamo che il tempo 
  osservato dal meccanismo di stima dell'entropia
@@ -738,7 +739,7 @@ ha preso forma l'implementazione attuale.
  un buffer in input al buffer interno di una specifica pool. Nel caso del LRNG,
  la mixing function è una "buona funzione hash non crittografica" \cite{lach}.
  In assenza di input, essa è equivalente ad un \emph{registro a scorrimento a
- retroazine lineare} (\emph{linear feedback shift register} o \emph{LFSR})
+ retroazione lineare} (\emph{linear feedback shift register} o \emph{LFSR})
  definito su un campo finito di $2^{32}$ elementi ($GF(2^{32})$), con polinomio
  di feedback $Q(X)=\alpha^3(P(X)-1)+1$ (con $\alpha$ primitiva di $GF(2^{32})$)
  e basato sui polinomi $P(X)$:
@@ -1208,12 +1209,12 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
   
 
  \section{Sicurezza nel LRNG}\label{sicurezza}
- In questa sezione diamo una breve visione di come sono implementati i requisiti
- di sicurezza nel LRNG, mentre per il lettore alla ricerca di una
+ In questa sezione diamo una rapida panoramica di come sono implementati
+ i requisiti di sicurezza nel LRNG, mentre per il lettore alla ricerca di una
  descrizione più approfondita rimandiamo agli articoli \cite{lach} (sezione 4) e
  \cite{gutt} (sezioni 3.1, 3.4).
  
- \subsection{I requisiti di sicurezza}
+ \subsection{I requisiti di sicurezza}\label{requisitiSicurezza}
  In \emph{``The Linux Pseudorandom Number Generator Revisited''}
  \cite{lach} (estendendo quanto analizzato in \emph{``Analysis of the Linux
  Random Number Generator''} \cite{gutt}) vengono elencati i seguenti requisiti
@@ -1222,10 +1223,10 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
    \item \textbf{buona stima di entropia:} l'entropia introdotta deve essere
    stimata in modo da rendere difficile per un attaccante prevedere gli output senza
    conoscere gli input;
-   \item \textbf{pseudorandomicità:} non deve essere possibile predire i futuri
-   output o conoscere lo stato interno a partire dalla conoscenza di output
-   correnti, anche per un attaccante con una conoscenza parziale delle sorgenti
-   di entropia;
+   \item \textbf{pseudorandomicità:} non deve essere possibile, per un
+   attaccante con una conoscenza parziale o totale delle sorgenti di entropia,
+   predire i futuri output o conoscere lo stato interno a partire dalla
+   conoscenza di output correnti;
    \item \textbf{forward security:} un attaccante che conosca lo stato interno
    del generatore non deve poter ricostruire i vecchi output prodotti
    (\emph{backtracking resistence}), ovvero non deve essere in grado di
@@ -1243,6 +1244,96 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
  pratica lo stato interno del generatore in quanto questo vive ed opera
  interamente nel kernel. 
  
+ 
+ \paragraph{}Nel seguito di questa sezione tratteremo i requisiti 2, 3 e 4 con
+ riferimento alle caratteristiche del LRNG esposte fino a questo momento,
+ mentre tralasciamo il requisito 1 in quanto necessiterebbe di
+ un'attenzione più teorica rispetto allo scopo del nostro lavoro.
+ 
+ \subsection{Pseudorandomicità}
+ Il requisito sulla pseudorandomicità considera il caso in cui l'attaccante
+ conosca completamente o in parte le \emph{entropy sources}, per cui
+ consideriamo il caso ancora peggiore della totale assenza di afflusso di
+ entropia esterna.\\
+ Il LRNG applica un feedback al proprio stato interno ogni volta che viene
+ estratto un output attraverso la \emph{mixing function} descritta in
+ \ref{mixingfunction} . Lacharme \emph{et al.} affermano che non vi sia
+ conoscenza di attacchi realizzabili, su un generatore di numeri pseudorandomici
+ (PRNG) siffatto, che possa fare a meno della conoscenza dello stato interno:
+ questo vale in ragione del fatto che SHA-1 è una funzione crittografica a senso
+ unico (o, come troviamo in letteratura, \emph{one-way}) e che dunque è teoricamente
+ impossibile derivare informazione sullo stato interno a partire dagli output
+ prodotti. L'operazione di \emph{folding} dei bytes estratti dalla \emph{pool}
+ rispetto a quelli restituiti come output impedisce inoltre di risalire allo
+ stesso hash prodotto da SHA-1.
+ 
+ \subsection{Resilienza alla crittoanalisi}
+ Come abbiamo anticipato, i requisiti di sicurezza 3 e 4 (visti in
+ \ref{requisitiSicurezza}) assumono che l'attaccante abbia una conoscenza
+ parziale o totale dello stato interno del generatore. Prima di analizzare come
+ il LRNG implementi il \emph{forward} e \emph{backward recovery}, vogliamo
+ analizzare velocemente in cosa consista tale conoscenza e quali siano gli
+ scenari in cui si possa considerare una possibilità concreta.
+ 
+ \paragraph{} Come già sappiamo (\ref{poolACosaServono}), lo stato interno è
+ implementato dalle tre \emph{pool input}, \emph{blocking} e \emph{nonblocking}:
+ ne consegue che quando parliamo di conoscenza dello stato interno ci riferiamo
+ alla capacità di un osservatore esterno di conoscere i valori nei buffer di
+ almeno una di esse. Abbiamo anche osservato in \ref{pool} come SHA-1 sia una
+ protezione robusta affinché gli output non ``tradiscano" nulla sul
+ contenuto informativo delle \emph{pool}. Per poter avere accesso ai buffer
+ interni alle \emph{pool} è necessario pertanto che l'osservatore sia in una
+ condizione (e posizione) particolarmente privilegiata (pensiamo ad esempio al
+ caso di \emph{ring deprivileging} che si può avere nella virtualizzazione di un
+ sistema operativo). 
+ 
+ \paragraph{} Per poter fare previsioni sugli output è necessario, in
+ particolare, conoscere lo stato delle \emph{pool} di output \emph{blocking} e
+ \emph{nonblocking}. Sappiamo però che queste sono tendenzialmente prive di
+ entropia fino al momento in cui viene richiesto loro di produrre un buffer in
+ output, ed anche in questo caso i bytes di entropia sono consumati all'istante:
+ l'attaccante dovrebbe pertanto catturare lo stato del buffer interno della
+ \emph{pool} tra il momento in cui avviene il reseeding con i bytes provenienti
+ dall'\emph{input pool} (tramite \verb+xfer_secondary_pool()+
+ \ref{trasf_input_output}) e quello in cui viene estratto l'hash e mischiato al
+ buffer in output; conoscere lo stato interno prima di questa brevissima
+ finestra sarebbe intutile a meno di possedere (e quindi aver catturato) anche
+ l'hash estratto dalla \emph{input pool} da \verb+xfer_secondary_pool()+.
+ Continuando questa ricerca a ritroso, troviamo che l'unico modo per poter fare
+ delle previsioni, in modo deterministico, sugli output di almeno una fra le
+ interfacce disponibili, occorre conoscere sia lo stato della rispettiva
+ \emph{output pool} che quello della \emph{input pool}. Anche in questo caso un
+ attaccante a conoscenza dello stato prima della generazione dell'output
+ conoscerebbe anche lo stato successivo solo a meno dei 160 bit mischiati
+ nuovamente alle \emph{pool} per il meccanismo di feedback: in assenza di
+ ulteriori informazioni un attacco generico avrebbe un overhead di $O(2^{160})$
+ e produrrebbe $2^{80}$ soluzioni (\cite{lach}). \\\\
+ Possiamo quindi considerare che l'assunzione sulla conoscenza da parte di un
+ attaccante dello stato interno, su cui si basano i due requisiti in esame, sia
+ fortemente difficile da realizzare.
+ 
+ \paragraph{Forward security:} Se un generatore di numeri pseudocasuali
+ ogni volta che produce i propri output lo fa sia attraverso una funzione
+ \emph{one-way} che adottando un meccanismo di feedback per aggiornare il
+ proprio stato interno, allora si può considerare resistente al
+ \emph{backtracking} (\cite{bark}) come richiesto dal requisito sul
+ \emph{forward recovery}. Il LRNG implementa tale requisito utilizzando la
+ primitiva SHA-1 per produrre l'hash su cui si basano il buffer restituito per
+ output e i bytes per il feedback verso la \emph{pool} (sezione
+ \ref{produzioneoutput}).
+ 
+ \paragraph{Backward security:} La \emph{backward security} è garantita soltanto
+ se si è effettuato un reseeding opportuno dello stato interno tra due richieste
+ di output distinte (\cite{bark}). Il meccanismo che implementa il requisito è
+ dato dal mancato trasferimento di bytes di entropia dalla \emph{input pool}
+ alle \emph{pool} secondarie se la prima non ha accumulato almeno 64 bit di
+ entropia: per questo motivo la resistenza a questo genere di attacchi
+ dichiarata per il LRNG è pari a 64 bit (\cite{lach}).
+ 
+ 
+ 
+ 
+
  
  \section{Cos'è cambiato?}
  \subsection{Mixing Function e Polinomio Caratteristico}

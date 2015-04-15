@@ -1,5 +1,11 @@
 \begin{thebibliography}{ZGR06}
 
+\bibitem[BK07]{bark}
+Elaine Barker and John Kelsey.
+\newblock Recommendation for random number generation using deterministic
+  random bit generators (revised).
+\newblock {\em Technical Report SP800-90, NIST}, 2007.
+
 \bibitem[Ker15]{kerr}
 Michael Kerrisk.
 \newblock \url{http://man7.org/linux/man-pages/man4/random.4.html} Random(4) -
