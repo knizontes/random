@@ -1208,6 +1208,23 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
   
 
  \section{Sicurezza nel LRNG}\label{sicurezza}
+ In questa sezione diamo una breve visione di come sono implementati i requisiti
+ di sicurezza nel LRNG, mentre per il lettore alla ricerca di una
+ descrizione più approfondita rimandiamo agli articoli \cite{lach} (sezione 4) e
+ \cite{gutt} (sezioni 3.1, 3.4).
+ 
+ \subsection{I requisiti di sicurezza}
+ In \emph{``The Linux Pseudorandom Number Generator Revisited''} (estendendo 
+ quanto trattato da \emph{``Analysis of the Linux Random Number Generator''})
+ vengono elencati i seguenti requisiti di sicurezza:
+ \begin{itemize}
+   \item buona stima di entropia: l'entropia introdotta deve essere stimata
+   in modo da rendere difficile per un attaccante prevedere gli output senza
+   conoscere gli input;
+   \item 
+ \end{itemize}
+ 
+ 
  \section{Cos'è cambiato?}
  \subsection{Mixing Function e Polinomio Caratteristico}
  \label{mixingfunctionchanges}

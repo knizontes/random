@@ -75,3 +75,7 @@ ritorna il massimo numero di bytes che possono essere estratti dalla pool e
 sveglia gli eventuali thread in attesa in scrittura.
 
 o Il fast mixing è reversibile? Sempre? 
+
+o Output phases
+
+Distinguere tra feedback phase e extraction phase (lach 11)
