@@ -1214,15 +1214,34 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
  \cite{gutt} (sezioni 3.1, 3.4).
  
  \subsection{I requisiti di sicurezza}
- In \emph{``The Linux Pseudorandom Number Generator Revisited''} (estendendo 
- quanto trattato da \emph{``Analysis of the Linux Random Number Generator''})
- vengono elencati i seguenti requisiti di sicurezza:
- \begin{itemize}
-   \item buona stima di entropia: l'entropia introdotta deve essere stimata
-   in modo da rendere difficile per un attaccante prevedere gli output senza
+ In \emph{``The Linux Pseudorandom Number Generator Revisited''}
+ \cite{lach} (estendendo quanto analizzato in \emph{``Analysis of the Linux
+ Random Number Generator''} \cite{gutt}) vengono elencati i seguenti requisiti
+ di sicurezza:
+ \begin{enumerate}
+   \item \textbf{buona stima di entropia:} l'entropia introdotta deve essere
+   stimata in modo da rendere difficile per un attaccante prevedere gli output senza
    conoscere gli input;
-   \item 
- \end{itemize}
+   \item \textbf{pseudorandomicità:} non deve essere possibile predire i futuri
+   output o conoscere lo stato interno a partire dalla conoscenza di output
+   correnti, anche per un attaccante con una conoscenza parziale delle sorgenti
+   di entropia;
+   \item \textbf{forward security:} un attaccante che conosca lo stato interno
+   del generatore non deve poter ricostruire i vecchi output prodotti
+   (\emph{backtracking resistence}), ovvero non deve essere in grado di
+   ricostruire i vecchi stati assunti dallo stato interno anche in assenza di
+   nuova entropia;
+   \item \textbf{backward security:} un attaccante che conosca lo stato interno
+   del generatore ad un dato istante non deve poter prevedere gli output futuri
+   del generatore se è stata introdotta una quantità sufficiente di entropia
+   dall'esterno.
+ \end{enumerate}
+ Come viene fatto notare in \cite{lach} i requisiti 3 e 4 assumono che un
+ attaccante conosca lo stato interno del generatore ad un dato istante, e
+ prevedono che il sistema sia resiliente ad attacchi di tipo crottoanalitico;
+ allo stesso tempo, gli autori osservano come sia difficile conoscere in
+ pratica lo stato interno del generatore in quanto questo vive ed opera
+ interamente nel kernel. 
  
  
  \section{Cos'è cambiato?}
