@@ -1,10 +1,20 @@
-\begin{thebibliography}{ZGR06}
+\begin{thebibliography}{Hor13b}
 
 \bibitem[BK07]{bark}
 Elaine Barker and John Kelsey.
 \newblock Recommendation for random number generation using deterministic
   random bit generators (revised).
 \newblock {\em Technical Report SP800-90, NIST}, 2007.
+
+\bibitem[Hor13a]{tayl}
+Taylor Hornby.
+\newblock \url{https://twitter.com/defusesec/status/408975222163795969} Twitter
+  'My RDRAND backdoor proof of concept is working!, 2013.
+
+\bibitem[Hor13b]{tayl2}
+Taylor Hornby.
+\newblock \url{http://pastebin.com/A07q3nL3} hacking and comment to random.c -
+  untitled, 2013.
 
 \bibitem[Ker15]{kerr}
 Michael Kerrisk.
@@ -14,6 +24,13 @@ Michael Kerrisk.
 \bibitem[MT14]{mack}
 Matt Mackall and Theodore Ts’o.
 \newblock random.c – a strong random number generator, june 2014, 2014.
+
+\bibitem[NPS13]{perl}
+Jeff~Larson Nicole~Perloth and Scott Shane.
+\newblock
+  \url{http://www.nytimes.com/2013/09/06/us/nsa-foils-much-internet-encryption.html?pagewanted=all&_r=0}
+  New York Times 'N.S.A. Able to Foil Basic Safeguards of Privacy on Web',
+  2013.
 
 \bibitem[PLV12]{lach}
 Vincent~Strubel Patrick~Lacharme, Andrea~Röck and Marion Videau.
@@ -25,6 +42,11 @@ Vincent~Strubel Patrick~Lacharme, Andrea~Röck and Marion Videau.
 Theodore Ts'o.
 \newblock \url{https://lkml.org/lkml/2012/7/17/650} Linux Kernel Mailing List
   archive, 2012.
+
+\bibitem[Ts'13]{tso2}
+Theodore Ts'o.
+\newblock \url{https://plus.google.com/+TheodoreTso/posts/SDcoemc9V3J} Google
+  Plus 'I resisted pressure from Intel engineers', 2013.
 
 \bibitem[ZGR06]{gutt}
 Benny~Pinkas Zvi~Gutterman and Tzachy Reinman.

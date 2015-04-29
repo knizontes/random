@@ -1,0 +1,38 @@
+\BOOKMARK [1][-]{section.1}{La Struttura del LRNG}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Un po' di notazione}{section.1}% 2
+\BOOKMARK [2][-]{subsection.1.2}{Struttura Generale}{section.1}% 3
+\BOOKMARK [3][-]{subsubsection.1.2.1}{Lo Stato Interno e le pool}{subsection.1.2}% 4
+\BOOKMARK [3][-]{subsubsection.1.2.2}{La gestione dell'entropia}{subsection.1.2}% 5
+\BOOKMARK [3][-]{subsubsection.1.2.3}{Le interfacce di output}{subsection.1.2}% 6
+\BOOKMARK [2][-]{subsection.1.3}{Le Pool}{section.1}% 7
+\BOOKMARK [3][-]{subsubsection.1.3.1}{A che servono le pool?}{subsection.1.3}% 8
+\BOOKMARK [3][-]{subsubsection.1.3.2}{Com'\350 strutturata una Pool}{subsection.1.3}% 9
+\BOOKMARK [2][-]{subsection.1.4}{I Device Files /dev/random e /dev/urandom}{section.1}% 10
+\BOOKMARK [2][-]{subsection.1.5}{Dagli Entropy Input all'Output}{section.1}% 11
+\BOOKMARK [1][-]{section.2}{L'Input}{}% 12
+\BOOKMARK [2][-]{subsection.2.1}{Il Reseeding da Spazio Utente}{section.2}% 13
+\BOOKMARK [2][-]{subsection.2.2}{Gli Entropy Input}{section.2}% 14
+\BOOKMARK [3][-]{subsubsection.2.2.1}{Le interfacce di input}{subsection.2.2}% 15
+\BOOKMARK [2][-]{subsection.2.3}{La Stima dell'Entropia}{section.2}% 16
+\BOOKMARK [3][-]{subsubsection.2.3.1}{Assunzioni e vincoli per l'entropy estimator}{subsection.2.3}% 17
+\BOOKMARK [3][-]{subsubsection.2.3.2}{La stima dell'entropia per entropy input}{subsection.2.3}% 18
+\BOOKMARK [3][-]{subsubsection.2.3.3}{L'accredito di entropia}{subsection.2.3}% 19
+\BOOKMARK [2][-]{subsection.2.4}{La Mixing Function}{section.2}% 20
+\BOOKMARK [1][-]{section.3}{L'Output}{}% 21
+\BOOKMARK [2][-]{subsection.3.1}{Estrazione di un buffer dalla pool}{section.3}% 22
+\BOOKMARK [2][-]{subsection.3.2}{Il trasferimento di entropia}{section.3}% 23
+\BOOKMARK [3][-]{subsubsection.3.2.1}{Dall'input pool alle output pool}{subsection.3.2}% 24
+\BOOKMARK [3][-]{subsubsection.3.2.2}{Il bilanciamento dell'entropia}{subsection.3.2}% 25
+\BOOKMARK [3][-]{subsubsection.3.2.3}{L'accounting di entropia}{subsection.3.2}% 26
+\BOOKMARK [2][-]{subsection.3.3}{La produzione dell'output}{section.3}% 27
+\BOOKMARK [3][-]{subsubsection.3.3.1}{Output nello spazio kernel}{subsection.3.3}% 28
+\BOOKMARK [3][-]{subsubsection.3.3.2}{Output nello spazio utente}{subsection.3.3}% 29
+\BOOKMARK [1][-]{section.4}{Sicurezza nel LRNG}{}% 30
+\BOOKMARK [2][-]{subsection.4.1}{I requisiti di sicurezza}{section.4}% 31
+\BOOKMARK [2][-]{subsection.4.2}{Pseudorandomicit\340}{section.4}% 32
+\BOOKMARK [2][-]{subsection.4.3}{Resilienza alla crittoanalisi}{section.4}% 33
+\BOOKMARK [1][-]{section.5}{Cos'\350 cambiato?}{}% 34
+\BOOKMARK [2][-]{subsection.5.1}{Mixing Function e Polinomio Caratteristico}{section.5}% 35
+\BOOKMARK [2][-]{subsection.5.2}{Rimozione di IRQF\137SAMPLE\137RANDOM}{section.5}% 36
+\BOOKMARK [2][-]{subsection.5.3}{Dibattito su RdRAND}{section.5}% 37
+\BOOKMARK [2][-]{subsection.5.4}{E in futuro?}{section.5}% 38

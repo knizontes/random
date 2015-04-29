@@ -4,8 +4,9 @@
 \usepackage[italian]{babel}
 \usepackage{listings}
 \usepackage{fullpage}
-\usepackage{pictexwd, dcpic}
-\usepackage{tikz-cd}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
 
 
 \newcommand{\knizPar}[3]{%
@@ -41,10 +42,9 @@ implementazione. Nello specifico, abbiamo analizzato la versione del kernel
 
 \section*{Una panoramica su LRNG\ldots}
  
-\paragraph{}L'implementazione del PRNG di Linux risiede sostanzialmente nella 
-sua interezza nelle $\sim~$1700 righe di codice del file sorgente 
-\verb$drivers/char/random.c$, scritto da Matt Mackall e Theodore Ts'o
-(\cite{mack}).
+\paragraph{}L'implementazione del \emph{PseudoRandomNumberGenerator} (PRNG) di
+Linux risiede sostanzialmente nelle $\sim~$1700 righe di codice del file sorgente
+\verb$drivers/char/random.c$, scritto da Matt Mackall e Theodore Ts'o (\cite{mack}).
 \paragraph{} Il LRNG è oggetto di particolare interesse per il ruolo che ricopre
 in applicazioni relative alla sicurezza per le quali è cruciale l'uso di un
 generatore di numeri pseudocasuali di buona qualità. 
@@ -67,8 +67,10 @@ del LRNG e sulla sua implementazione. Nelle sezioni che seguono diamo una
 descrizione delle sue:
 \begin{enumerate}
   \item struttura;
+  \item gestione degli input di entropia esterna;
   \item produzone degli output;
-  \item implementazione.
+  \item implementazione dei requisiti di sicurezza;
+  \item storia ed evoluzione recente.
 \end{enumerate}
 
 \section{La Struttura del LRNG}
@@ -91,8 +93,8 @@ descrizione delle sue:
  di tre tipi:
  \begin{itemize}
    \item \textbf{user input}: input provenienti da mouse e tastiera;
-   \item \textbf{interrupts};
-   \item \textbf{disk I/O}
+   \item \textbf{disk I/O};
+   \item \textbf{interrupts}.
  \end{itemize}
  \paragraph{}L'entropia di un'entropy input è costituita dal valore dello
  specifico input e dal tempo intercorso tra l'input presente e l'ultimo input
@@ -114,13 +116,14 @@ e aggiungono entropia al generatore in modo asincrono e
  nome di \textbf{stato interno}, inaccessibile per via diretta. Il LRNG produce
  i propri output a partire dai valori contenuti nel suo stato interno.
  Conseguentemente, lo stato interno deve essere aggiornato non solo attraverso
- la raccolta di quanti più entropy input possibile, ma anche ogni volta che
- viene richiesto un buffer in output al LRNG. La sicurezza del generatore,
- ovvero l'impossibilità di prevedere gli output futuri (backward security) una
- volta che siano noti gli entropy inputs e l'impossibilità di ricostruire gli
- output passati (forward security) a partire dalla conoscenza dello stato
- interno, è descritta nella sezione riguardante la sicurezza del LRNG
- (\ref{sicurezza}).
+ la raccolta di quanti più \emph{entropy input} possibile, ma anche ogni volta
+ che viene richiesto un buffer in output al LRNG (mediante un
+ opportuno meccanismo di feedback).
+ La sicurezza del generatore, ovvero l'impossibilità di prevedere gli output
+ futuri (\emph{backward security}) una volta che siano noti gli \emph{entropy
+ input} e l'impossibilità di ricostruire gli output passati (\emph{forward
+ security}) a partire dalla conoscenza dello stato interno, è descritta nella
+ sezione \ref{sicurezza} riguardante la sicurezza del LRNG.
  \paragraph{}In quel che segue della presente sezione diamo una breve
  descrizione dello stato interno del generatore e delle sue interfacce.
  
@@ -134,32 +137,33 @@ e aggiungono entropia al generatore in modo asincrono e
  \end{itemize}
  
  \paragraph{}L'entropia aggiunta al generatore dagli \emph{entropy inputs}
- viene accumulata nella \emph{input pool}. L'entropia viene poi trasferita
- verso una delle altre due pool, \emph{blocking} o \emph{nonblocking},
- generalmente (ma non solo!) in occasione del prelievo di bytes randomici in
- output dal LRNG e nella quantità strettamente necessaria. Per questo le pool \emph{blocking} e
- \emph{nonblocking} sono anche dette \textbf{output pool} 
- (\cite{lach},\cite{gutt}). Tratteremo nel dettaglio la struttura delle tre pool
- in \ref{pool}.
+ viene accumulata nella \emph{input pool} (chiamata anche \emph{pool} primaria
+ in \cite{gutt}). L'entropia viene poi trasferita verso una delle altre due
+ pool, \emph{blocking} o \emph{nonblocking}, generalmente (ma non solo!) in
+ occasione del prelievo di bytes randomici in output dal LRNG e nella quantità
+ strettamente necessaria. Per questo le pool \emph{blocking} e
+ \emph{nonblocking} sono anche dette \textbf{output pool} o \emph{pool}
+ secondarie (rispettivamente in \cite{lach} e \cite{gutt}). Tratteremo nel
+ dettaglio la struttura delle tre pool in \ref{pool}.
  
  \subsubsection{La gestione dell'entropia}\label{aggiuntaentropia}
  \paragraph{}Il LRNG si comporta in modo diverso nel gestire
  il mantenimento dell'entropia interna a seconda che questa venga
  aggiunta o estratta rispetto alle \emph{pool}. \\
  Quando viene immessa nelle pool dell'entropia derivata dagli
- \emph{entropy input} o proveniente dalla \emph{input pool} 
+ \emph{entropy input} o proveniente dalla \emph{input pool}, 
  il kernel usa una mixing function lineare per efficientare
  l'accumulazione di entropia nell'\emph{input pool} (viene preferita
  pertanto una CRC all'uso di una funzione hash sebbene la prima non sia
- crittograficamente robusta), mentre quando viene trasferita entropia
+ crittograficamente robusta), mentre, quando viene trasferita entropia
  dalla input pool verso una output pool o vengono generati bit dalle output
- pool il LRNG fa uso della primitiva crittografica SHA-1. \\È facile convincersi
- dei benefici introdotti da questa disparità, in quanto l'aggiunta di entropia
- rimane un'operazione veloce nonostante gli \emph{entropy inputs} abbiano un
+ pool, il LRNG fa uso della primitiva crittografica SHA-1. \\
+ È facile convincersi dei benefici introdotti da questa disparità, in quanto l'aggiunta di entropia
+ rimane un'operazione veloce nonostante gli \emph{entropy input} abbiano un
  tasso di arrivo elevato (e maggiore di vari ordini di grandezza rispetto al
- tasso con cui vengono richiesti gli output). 
+ tasso con cui mediamente sono richiesti gli output).\\ 
  Anche se ci proponiamo di definire più avanti il concetto di ``sicurezza''
- relativamente al LRNG, vogliamo già dare risalto al fatto che la segretezza
+ riferito al LRNG, vogliamo già dare risalto al fatto che la segretezza
  dello stato interno risieda fondamentalmente nell'adozione di SHA-1 per la
  produzione degli output.
  
@@ -341,16 +345,18 @@ vediamo ora come interagiscono fra di loro.
  Come visto in \ref{devicefiles}, l'operazione di scrittura di un buffer
  direttamente presso i device files \verb+/dev/random+ e \verb+/dev/urandom+
  comporta un reseeding dello stato interno del generatore a partire da un hash
- del buffer stesso. Tale operazione è addirittura incoraggiata nell'header di
+ del buffer stesso. Tale operazione è incoraggiata nell'header di
  \verb+random.c+, dove viene specificato che, per differenziare gli output
  prodotti in prossimità del momento del boot della macchina, è opportuna
  l'esecuzione di uno script all'avvio che scriva presso \verb+random+ o
  \verb+urandom+ un buffer letto dagli stessi device files prima dello shutdown
- della macchina. In questo modo il sistema produrrà output differenti anche
- quando è stata raccolta ancora poca (o nulla) entropia, cioè in prossimità
- dell'avvio del sistema. Ovviamente, nel caso non siano presenti dispositivi per
- la memorizzazione pesistente (dischi, flash, ecc) non è possibile adottare un
- simile accorgimento.
+ della macchina. In questo modo il sistema appena avviato produrrà output
+ differenti, rispetto a quelli prodotti a ridosso di altri startup dello stesso
+ sistema, anche quando è stata raccolta ancora poca (o nulla) entropia
+ (fatto inevitabile a ridosso dell'inizializzazione del sistema).
+ Ovviamente, nel caso non siano presenti dispositivi per la memorizzazione
+ persistente (dischi, flash, ecc) non è possibile adottare un simile
+ accorgimento.
  \paragraph{} Vi sono altri scenari per cui può rendersi opportuno imporre
  un reseeding dello stato interno del generatore. Ad esempio, si può aumentare
  il livello di confidenza verso i valori prodotti in output da \verb+urandom+
@@ -366,7 +372,7 @@ vediamo ora come interagiscono fra di loro.
  
 
  
- \subsection{Gli \emph{Entropy Input}}
+ \subsection{Gli \emph{Entropy Input}}\label{entropyInputs}
  Gli \emph{entropy input} sono l'unica sorgente di casualità autentica (per
  quanto possibile) per il generatore: tutto il nondeterminismo introdotto
  nello stato interno del LRNG ha origine infatti dall'impredicibilità degli
@@ -410,7 +416,10 @@ vediamo ora come interagiscono fra di loro.
  espresso in jiffies, tra l'ultima occorrenza di un evento e quella
  immediatamente precedente (se esiste) di un evento dello stesso tipo.\newline{}
  Il secondo ordine di delta, \verb+delta2+, è pari alla differenza tra il delta
- di primo ordine appena calcolato.
+ di primo ordine appena calcolato.\\
+ Da questi due ordini di delta viene poi derivato un terzo ordine \verb+delta3+
+ che non viene memorizzato in quanto calcolato al momento della stima
+ dell'entropia per l'\emph{entropy input} in analisi (\ref{stimaInput}).
  
  Vediamo nel dettaglio ciascuna delle interfacce di input (di cui è presente una 
  prima descrizione direttamente nell'header di \verb+random.c+).
@@ -427,14 +436,13 @@ vediamo ora come interagiscono fra di loro.
  schede di rete, ecc.). 
  \newline Notiamo come il contributo di questa routine nell'aggiornare lo
  stato interno è sostanzialmente deterministico e identico per ogni boot del kernel,
- per cui non possiamo considerare alcun aumento dell'entropia del
+ motivo per cui non viene considerato alcun aumento dell'entropia del
  generatore. \newline
  Riteniamo che la possibilità che dispositivi tra loro identici abbiano un tempo
- di boot a sua volta identico sia il motivo per cui, nel caso specifico di
- questa funzione, la funzione \verb+get_cycles()+ possa essere sovrascritta in
- questo punto o non considerata affatto a seconda delle architetture. In
- particolare, \verb+get_cycles()+ ritorna un valore diverso da zero solo in
- presenza di un \emph{Time Stamp Counter} (\emph{TSC}), che è una prerogativa
+ di boot a sua volta identico sia il motivo per cui la funzione
+ \verb+get_cycles()+ è implementata solo da alcune architetture.
+ In particolare, \verb+get_cycles()+ ritorna un valore diverso da zero solo in
+ presenza di un \emph{Time Stamp Counter} (\emph{TSC}), implementato
  quasi esclusiva delle architetture \verb+x86+. Nel caso in cui
  \verb+get_cycles()+ ritorni zero, l'unico contributo basato sul tempo
  dell'evento proviene dal valore di jiffies.
@@ -455,8 +463,8 @@ vediamo ora come interagiscono fra di loro.
    \item \verb+code+ - il codice dell'input (ad esempio quale tasto della
    tastiera o del mouse è stato premuto o rilasciato);
    \item \verb+value+ - il valore dell'input, specifica quale evento specifico è
-   occorso per il codice code (ad esempio se il tasto è stato premuto, mantenuto o rilasciato,
-   ecc).
+   occorso per il codice code (ad esempio se il tasto è stato premuto,
+   mantenuto o rilasciato, ecc).
    \end{enumerate} 
  L'entropia viene aggiunta allo stato interno sotto forma di un buffer
  ottenuto mischiando i tre parametri.
@@ -1232,8 +1240,8 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
    (\emph{backtracking resistence}), ovvero non deve essere in grado di
    ricostruire i vecchi stati assunti dallo stato interno anche in assenza di
    nuova entropia;
-   \item \textbf{backward security:} un attaccante che conosca lo stato interno
-   del generatore ad un dato istante non deve poter prevedere gli output futuri
+   \item \textbf{backward security:} (detto anche \emph{break in recovery}) un
+   attaccante che conosca lo stato interno del generatore ad un dato istante non deve poter prevedere gli output futuri
    del generatore se è stata introdotta una quantità sufficiente di entropia
    dall'esterno.
  \end{enumerate}
@@ -1336,15 +1344,158 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
 
  
  \section{Cos'è cambiato?}
+ Nella realizzazione del presente lavoro ci siamo imbattuti spesso nelle
+ ``tracce'' lasciate dalle vecchie implementazioni del codice -- dalle
+ transizioni tra soluzioni differenti alle ottimizzazioni di varia natura --,
+ come ad esempio le incongruenze tra quanto affermato nei commenti del codice,
+ le differenza tra il codice attuale e quanto affermato negli articoli e
+ la presenza nel codice alcuni rami morti del flusso di esecuzione (provenienti
+ da meccanismi funzionali rimossi da poco tempo).\\
+ Questa sezione ha lo scopo di ``raccontare'' alcuni fra i cambiamenti che
+ abbiamo rintracciato, o perché funzionalmente di rilievo (come la
+ modifica al polinomio caratteristico delle \emph{mixing function}) e le
+ criticità (e le critiche) che sono emerse recentemente sull'uso del generatore
+ hardware di numeri randomici delle ultime architetture \verb+x86+ della
+ \emph{Intel}.
+ 
+ 
  \subsection{Mixing Function e Polinomio Caratteristico}
  \label{mixingfunctionchanges}
-  POLINOMIO E PERIODO IN GF 32 pagina 7 lach 
- \subsection{Rimozione di
- IRQF\textunderscore{}SAMPLE\textunderscore{}RANDOM}\label{IRQFSAMPLERANDOM}
- \subsection{Gli interrupt come unica \emph{entropy source}}
- \cite{lach} dice il contrario a pagina 5
- \cite{tso}
+ L'ottimizzazione più evidente avvenuta negli ultimi due anni
+ all'implementazione del LRNG risiede nel polinomio caratteristico della
+ \emph{mixing function}: come rimarcato nei commenti stessi del codice, la
+ \emph{mixing function} utilizzato fin dall'origine non generava, in assenza
+ di entropia esterna, una sequenza di stati interni di periodo massimo.
+ Questo fatto è stato notato per la prima volta proprio nell'articolo di
+ Lacharme \emph{et al.} \emph{``The linux pseudorandom
+number generator revisited''} (\cite{lach} a pagina 7), dove si suggerivano
+anche le modifiche che si sarebbero dovute applicare ai polinomi caratteristici
+relativi alle \emph{pool} primaria e secondarie per rendere massimo tale periodo
+in $GF(32)$.
+
+\paragraph{} I cambiamenti suggeriti sono stati accolti dalle nuove versioni
+del kernel, così che oggi il polinomio relativo alla \emph{input pool}:
+\begin{center}
+$P(X)=X^{128}+X^{\textcolor{red}{103}}+X^{76}+X^{51}+X^{25}+X+1$
+\end{center}
+è diventato:
+\begin{center}
+$P(X)=X^{128}+X^{\textcolor{blue}{104}}+X^{76}+X^{51}+X^{25}+X+1$
+\end{center}
+mentre il polinomio caratteristico per le \emph{pool} di output è mutato da:
+\begin{center}
+$P(X)=X^{32}+X^{26}+X^{\textcolor{red}{19}}+X^{14}+X^{7}+X+1$
+\end{center}
+a:
+\begin{center}
+$P(X)=X^{32}+X^{26}+X^{\textcolor{blue}{20}}+X^{14}+X^{7}+X+1$
+\end{center}
+\paragraph{}I periodi sono così aumentati da meno di $2^{92*32}-1$ a
+$2^{128*32}-1$ per la \emph{input pool} e da meno di $2^{26*32}-1$ a $2^{32*32}-1$ per le
+\emph{output pool} (sempre da \cite{lach}).
+
+ \subsection{Rimozione di IRQF\textunderscore{}SAMPLE\textunderscore{}RANDOM}
+ \label{IRQFSAMPLERANDOM}
+ Fino alla versione 3.6 del kernel, era necessario dichiarare direttamente nei
+ driver se gli interrupt specifici per ciascuno di essi dovessero essere
+ considerati sorgenti di entropia o meno. In \cite{lach} si descrive come, per
+ fare ciò, si doveva impostare per ciascuno di essi il flag
+ \verb+IRQF_SAMPLE_RANDOM+. Dal 2009 si è iniziato a soppiantare
+ \verb+IRQF_SAMPLE_RANDOM+, nella gestione degli interrupt, con un approccio
+ completamente automatizzato, al punto da sostituirlo completamente nel 2012
+ come affermato dallo stesso Theodore Ts'o in una mail della \emph{Linux Kernel
+ Mailing List} (rintracciabile nell'archivio in \cite{tso}):
+ \begin{center}
+ \emph{The 
+ IRQF\textunderscore{}SAMPLE\textunderscore{}RANDOM flag is finally gone\\ from
+ the kernel tree, only three years late.  :-)}
+ \end{center}
  
+ \paragraph{}Il motivo alla base di questa sostituzione furono gli usi
+ sbagliati che venivano fatti del flag nell'implementazione dei driver. Durante
+ questi tre anni di transitorio, gli interrupts vennero di fatto ignorati come
+ sorgenti di entropia perché si è ritenuto non vi si potesse più fare
+ affidamento con un sufficiente grado di confidenza e le uniche sorgenti di
+ entropia rimaste erano soltanto gli input utente e i \emph{disk timings}
+ (pagina 4 di \cite{lach}). Notiamo (come visto in \ref{entropyInputs}) che
+ anche nell'implementazione attuale ogni interrupt concorre al più per solo un
+ bit all'aumento dell'entropia del generatore, mentre gli input utente e i
+ tempi di accesso a disco sono stimati avere un contenuto di entropia pari a 64
+ bit.
+ 
+ \subsection{Dibattito su RdRAND}\label{rdrand}
+ Nel settembre 2013, sul \emph{New York Times}, esce un articolo (\cite{perl})
+ che titola ``\emph{N.S.A. Able to Foil Basic Safeguards of Privacy on Web}'' e
+ in cui si afferma, tra le varie cose, che il governo statunitense, nelle vesti
+ dell'agenzia \emph{N.S.A.}, avrebbe fatto pressione verso diversi manifacturer
+ di hardware per inserire \emph{back doors} nei propri prodotti dedicati alla
+ sicurezza.
+ \paragraph{}Con riferimento all'articolo del \emph{NYT}, il ``padre'' del LRNG
+ Theodore Ts'o pubblica sul suo profilo \emph{Google Plus} \cite{tso2}:
+ \begin{center}
+ «\emph{I am so glad I resisted pressure from Intel engineers to \\ 
+ let /dev/random rely only on the RDRAND instruction.\\   
+ To quote from the article below:\newline\newline
+``By this year, the Sigint Enabling Project had found\\ 
+ways inside some of the encryption chips that scramble\\
+information for businesses and governments, either by \\
+working with chipmakers to insert back doors...''\newline\newline
+Relying solely on the hardware random number generator \\
+which is using an implementation sealed inside a chip\\ 
+which is impossible to audit is a BAD idea.﻿}»
+ \end{center}
+ \paragraph{}Taylor Hornby, un ricercatore e programmatore canadese, due mesi
+ più tardi afferma in un tweet (\cite{tayl}) di essere riuscito a modificare
+ l'istruzione \verb+RDRAND+ per ``\emph{cancellare l'altra entropia}'', ovvero
+ l'entropia raccolta dal LRNG senza l'ausilio del generatore hardware dei
+ processori \verb+x86+, pubblicando contestualmente l'immagine del codice
+ dell'hacking e del suo effetto su \verb+/dev/urandom+. Oltre a ciò, sempre
+ Hornby pubblica un suo commento al codice (\cite{tayl2}) in cui mette in
+ rilievo alcune contraddizioni dei commenti originali: fra questi, vogliamo rilevare in
+ particolare il commento alla routine \verb+get_random_bytes()+ dove
+ si evidenzia la non veridicità dell'affermazione, presente nel codice, sul non
+ uso di generatori hardware di numeri randomici. Come abbiamo verificato noi
+ stessi nel presente lavoro (nelle sezioni \ref{estrazionebuffer} e 
+ \ref{kerneloutput}), nelle architetture \verb+x86+ \emph{Intel onchips} viene
+ in effetti fatto uso del generatore hardware presente nei chipset durante
+ l'estrazione di un buffer di bytes randomici dalle \emph{pool} (la
+ chiamata \verb+RDRAND+ corrisponde nel kernel a \verb+get_get_random()+).
+ Le nostre osservazioni pertanto confortano quanto affermato da Hornby.
+ \paragraph{}L'hacking compiuto da Hornby però non sembra essere applicabile per
+ le versioni del kernel successive alla 3.12.3 ma, come lui stesso afferma, è
+ ragionevole non escludere l'esistenza di altri punti deboli negli output del
+ LRNG:
+ \begin{center}
+ «\emph{It's fixed in 3.13-rc2, in that you can't \\
+ control /dev/(u)random output, but you can still \\
+ weaken some other properties.}»
+ \end{center}
+ 
+ \subsection{E in futuro?}
+ Sia Guttermann \emph{et al.} in \cite{gutt} che Lacharme \emph{et al.} in
+ \cite{lach} sono concordi nella necessità di una documentazione del codice più
+ approfondita sull'implementazione del LRNG. Soprattutto, abbiamo notato
+ nel nostro lavoro come addirittura il commento di corredo al codice sorgente, oltre
+ che carente di dettagli, sia in alcuni punti obsoleto. Il bisogno di una
+ documentazione aggiornata è stata alla base della pubblicazione degli articoli
+ sopra citati e, con necessaria e molta modestia, di questa nostra analisi, e si
+ giustifica considerando la sensibilità degli scenari in cui il LRNG deve
+ impiegato e l'affidabilità che conseguentemente gli viene richiesta.
+ Le problematiche emerse di recente sulla possibile presenza di \emph{back door}
+ nelgli stessi chipset utilizzati dal generatore impone un'analisi più
+ approfondita e, a nostro avviso, la necessità di rimuovere l'uso
+ di generatori hardware nell'implementazione del LRNG, ancora ad oggi presente.
+ 
+ 
+ 
+ \section*{Conclusioni}
+ Nel lavoro che abbiamo presentato sono state esposte le funzionalità del Linux
+ Random Number Generator, con particolare attenzione alle interfacce
+ \verb+/dev/random+ e \verb+/dev/urandom+ esposte verso lo spazio utente.
+ Oltre alla descrizione funzionale, è stata analizzata l'implementazione della
+ gestione dell'entropia raccolta dal sistema, sia al momento della sua raccolta
+ a partire da \emph{entropy inputs} sia relativamente alla produzione di bytes
+ di entropia come output.
  
 \bibliographystyle{alpha}   
 \bibliography{biblio}   
