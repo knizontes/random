@@ -473,7 +473,7 @@ vediamo ora come interagiscono fra di loro.
  ovvero non sortiscono alcun effetto e la funzione ritorna.
  
  \paragraph{} \verb+add_interrupt_randomness()+ aggiunge un
- \emph{entropy input} a partire da un'\emph{irq}. L'aggiunta di entropia avviene
+ \emph{entropy input} a partire da un'\verb+irq+. L'aggiunta di entropia avviene
  attraverso quattro passi:
  \begin{enumerate}
    \item Viene creato un array, \textbf{input}, di 4 parole da 32 bit, ottenute
@@ -485,31 +485,31 @@ vediamo ora come interagiscono fra di loro.
    l'inizializzazione delle parole di \emph{input}. \emph{Cycles} è un valore a
    64 bit (e viene pertanto diviso in due valori da 32 bit) anche nel caso in
    cui l'architettura non sia a 64 bit ma sia pur sempre una \verb+x86+.
-   \item Viene mischiato l'array \emph{input} alla
-   \textbf{fast\textunderscore{}pool irq\textunderscore{}randomness}, una
+   \item Viene mischiato l'array \verb+input+ alla
+   \verb+fast_pool+ \verb+irq_randomness+, una
    struttura che possiede una mini-pool di 4 valori a 32 bit inizializzata con i
    valori dei registri della cpu al momento della chiamata dell'interruzione. 
    La funzione di mixing adottata è \verb+fast_mix()+, che mischia i valori alla
-   \emph{fast\textunderscore{}pool} facendo uso di una speciale
-   \textbf{twist\textunderscore{}table}. Se l'ultimo aggiornamento visto dalla
+   \verb+fast_pool+ facendo uso di una speciale tabella per il mixing
+   \verb+twist_table+. Se l'ultimo aggiornamento visto dalla
    CPU è troppo recente rispetto all'\emph{interrupt request} attuale, la
    routine \verb+add_interrupt_randomness+ ritorna, sortendo come unico effetto
-   un aggiornamento di \emph{irq\textunderscore{}randomness}.
+   un aggiornamento di \verb+irq_randomness+.
    \item Vengono mischiati tutti i bytes della mini-pool di
-   \emph{irq\textunderscore{}randomness} presso l'\emph{input pool} (oppure
+   \verb+irq_randomness+ presso l'\emph{input pool} (oppure
    presso \emph{nonblocking pool} nel caso questa debba ancora essere
    inizializzata).
    \item Viene accreditata una stima di entropia pari a 1 bit presso la
    \emph{entropy pool} selezionata al passo 3. Tale accreditamento viene omesso
    nel caso in cui non vi sia un contatore di cicli valido per l'architettura
-   specifica oppure se si osservano interrupt dei timer consecutivi.
+   specifica oppure se si osservano timer interrupt consecutivi.
  \end{enumerate} 
 
  
  \paragraph{} \verb+add_disk_randomness()+ sfrutta la variabilità del 
  \emph{seek time} dei settori dei dischi. Dischi a stato solido sono ovviamente
  quasi completamente inefficaci nell'aggiungere entropia, accedendo ai blocchi di 
- dati in tempo praticamente costante. \newline{}Opera sulla struttura 
+ dati in tempo approssimativamente costante. \newline{}Opera sulla struttura 
  \verb+gendisk *disk+ (definita in \verb+include/linux/genhd.c+) specifica per
  il disco che ha generato l'evento.
  In particolare fa uso della struttura \verb+timer_rand_state+ in
@@ -518,25 +518,27 @@ vediamo ora come interagiscono fra di loro.
  \subsection{La Stima dell'Entropia}\label{stima}
 La stima dell'entropia nel LRNG ha come obiettivo di quantificare
 l'impredicibilità su cui si può fare affidamento al momento della generazione
-di bytes. La stima dell'entropia è un'attività centrale per il LRNG per
-due semplici assunzioni: 
+di bytes ed è pertanto un'attività di centrale importanza per il LRNG. \\
+Si basa su due assunzioni: 
 \begin{itemize}
   \item ogni \emph{entropy input} aggiunge una quantità finita di entropia al
   generatore;
   \item ogni output prodotto consuma una quota dell'entropia totale presente
   presso il generatore.
 \end{itemize}  
-\paragraph{} Sappiamo già (da \ref{interfacceoutput} e \ref{pool}) che sebbene
-la stima dell'entropia presente nelle pool (conteggiata negli \emph{entropy
-counter} di ciascuna) entri in gioco per la produzione di qualsiasi output, nel
-caso degli output prodotti dalla \emph{input} e \emph{blocking pool} è la
-condizione in base alla quale il LRNG sceglie se generare o meno bytes verso le
-interfacce che ne fanno richiesta. \newline Gli output prodotti in assenza di entropia
-(provenienti dalla \emph{nonblocking pool} quando il suo \emph{entropy counter} si avvicina a
-zero) sono equivalenti a quelli prodotti da un generatore di numeri
-pseudocasuali semplice. Il grado di confidenza che si può avere con
-l'indipendenza (pur sempre virtuale) di simili output tra loro, seppure elevata, è ovviamente
-inferiore rispetto agli output prodotti a partire dall'entropia esterna.
+\paragraph{} Sappiamo già (da \ref{interfacceoutput} e \ref{pool} ) che sebbene
+il conteggio dell'entropia accumulata nelle pool (conteggiata negli
+\emph{entropy counter} di ciascuna) entri in gioco per la produzione di
+qualsiasi output, nel caso degli output prodotti dalla \emph{input} e
+\emph{blocking pool} è la condizione in base alla quale il LRNG sceglie se
+generare o meno bytes verso le interfacce che ne fanno richiesta. \newline Gli
+output prodotti in assenza di entropia (provenienti dalla \emph{nonblocking
+pool} quando il suo \emph{entropy counter} ha valore zero) sono equivalenti
+a quelli prodotti da un generatore di numeri pseudocasuali semplice (ovvero
+privo di \emph{entropy inputs}).
+Il grado di confidenza che si può avere con l'indipendenza (pur sempre
+apparente) di simili output tra loro, seppure elevata, è ovviamente inferiore
+rispetto agli output prodotti a partire dall'entropia esterna.
 L'utilizzo di sorgenti esterne infatti aumenta, per un attaccante
 che abbia accesso a un insieme di output, la difficoltà di inferire informazione
 riguardo agli altri valori (passati e futuri) prodotti.
