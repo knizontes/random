@@ -551,11 +551,17 @@ riguardo agli altri valori (passati e futuri) prodotti.
 Prendendo spunto da \cite{lach} (sez. 2.3.2), ci riferiremo col termine di
 \textbf{\emph{entropy estimator}} al complesso di entrambi i meccanismi.
 
+\paragraph{Nota sulla sicurezza:} Il grado di confidenza che un utente può
+accordare al LRNG deve tenere conto anche di eventuali vulnerabilità del LRNG
+che potrebbero annullare i benefici introdotti dall'aggiunta di entropia
+esterna: riportiamo un esempio interessante in questo senso nella sezione
+\ref{rdrand} riguardante le vulnerabilità di \emph{RdRand}.
+
 \subsubsection{Assunzioni e vincoli per l'\emph{entropy
 estimator}}\label{vincoliStima} Prima di analizzare com'è implementato
-l'\emph{entropy estimator}, diamo ragione brevemente delle assunzioni e dei vincoli sugli \emph{entropy
-input}, individuati nell'articolo di Lacharme \cite{lach}, a partire dai quali
-ha preso forma l'implementazione attuale.
+l'\emph{entropy estimator}, diamo ragione brevemente delle assunzioni e dei
+vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
+\cite{lach}, a partire dai quali ha preso forma l'implementazione attuale.
 \paragraph{Assunzioni:}
 \begin{itemize}
   \item le distribuzioni di probabilità sono sconosciute e non uniformi: esse
@@ -588,17 +594,18 @@ ha preso forma l'implementazione attuale.
  In ciascuna delle interfacce descritte in \ref{interfacceinput} è implementato
  il meccanismo particolare per l'input in gestione. Specifichiamo che il tempo 
  osservato dal meccanismo di stima dell'entropia
- è sempre misurato in \emph{jiffies}, affiché la stima sia sempre pessimistica:
+ è sempre misurato solo in \emph{jiffies}, affiché la stima sia sempre
+ pessimistica:
  la stima non tiene conto del numero di \emph{cycles} anche quando questo sia
  disponibile e venga utilizzato dalla funzione di mixing.
  
  \paragraph{}\verb+add_device_randomness()+ non implementa alcuna stima di
- entropia, in quanto i valri che vengono presi in input sono quelli che servono
+ entropia, in quanto i valori che vengono presi in input sono quelli che servono
  a distinguere quanto più possibile la configurazione dell'architettura
- presente da tutte le altre. A fronte di avvi distinti della macchina, il
+ presente da tutte le altre. A fronte di avvìi distinti della macchina, il
  contributo di questa routine nell'aggiornamento dello stato interno del
  generatore è sempre lo stesso, ed è per questa ragione che non vi è alcuna
- ``nuova" impredicibilità da considerare per la stima dell'entropia.
+ ``nuova'' impredicibilità da considerare per la stima dell'entropia.
  
  \paragraph{}\verb+add_interrupt_randomness()+ prova a accreditare presso la
  \emph{entropy pool} opportuna un bit di entropia per ogni interrupt ricevuto, a
@@ -616,10 +623,10 @@ ha preso forma l'implementazione attuale.
    valido per l'architettura corrente;
    \item viene aggiunto il contenuto informativo dell'input alla \emph{fast
    pool} ma non presso alcuna \emph{entropy pool}, né viene accreditata
-   l'entropia presso la \emph{pool}: se l'interrupt è avvenuto a meno di 100
-   jiffies dall'ultimo aggiornamento della \emph{fast pool} oppure il counter
-   della fast pool è congruo a $2^6$ (sebbene sia un valore \verb+short+ e possa
-   assumere valori in $2^{16}$ )
+   l'entropia presso la \emph{pool}: è quanto avviene se l'interrupt si è
+   verificato a meno di 100 jiffies dall'ultimo aggiornamento della \emph{fast
+   pool} oppure il counter della fast pool è congruo a $2^6$ (sebbene sia un
+   valore \verb+short+ e possa assumere valori in $2^{16}$ ).
  \end{enumerate}
  
  \paragraph{}\verb+add_input_randomness()+ e \verb+add_disk_randomness()+
