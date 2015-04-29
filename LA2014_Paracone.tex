@@ -640,14 +640,15 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
  \begin{enumerate}
    \item $\delta$ (nel codice sorgente, \verb+delta+) è pari al tempo di
    interarrivo tra gli ultimi due input, ovvero tra quello corrente e il suo
-   predecessore;
+   predecessore;\label{delta1}
    \item $\delta_2$ (\verb+delta2+) è pari a $|\delta-\delta_{old}|$, ovvero al
-   modulo della differenza tra il $\delta$ calcolato in 1 e il $\delta_{old}$
-   calcolato per l'ultimo input giunto dalla stessa sorgente di entropia;
+   modulo della differenza tra il $\delta$ calcolato al punto \ref{delta1} e il
+   $\delta_{old}$ calcolato per l'ultimo input giunto dalla stessa sorgente di entropia;
    \item $\delta_3$ (\verb+delta3+) è pari a $|\delta_2-\delta_{2\ old}|$.
  \end{enumerate}
- Durante la chiamata a \verb+add_timer_randomness()+ viene disattivata la
- \emph{preemption}. 
+ Una volta calcolati i tre ordini di delta, viene considerato per la stima
+ dell'entropia quello col valore minore.\\ Durante la chiamata a
+ \verb+add_timer_randomness()+ viene disattivata la \emph{preemption}.
  
  \subsubsection{L'accredito di entropia}\label{credit}
  L'accredito di entropia presso le \emph{pool} avviene tramite le routine
@@ -675,7 +676,7 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
  accresce di molto la risoluzione del meccanismo di accredito asintotico di
  bit di entropia presso le pool, facendo sì che possano essere conteggiate
  le aggiunte di entropia degli \emph{entropy input} anche quando la \emph{pool}
- è praticamente ``satura''. Ovviamente, per la produzione di bit in output
+ è quasi ``satura''. Ovviamente, per la produzione di bit in output
  vengono considerati solo valori interi.
  
  \paragraph{}Analizziamo di seguito i passi richiesti dall'operazione di
