@@ -1720,7 +1720,8 @@ static void extract_buf(struct entropy_store *r, __u8 *out)
 	 */
 	/*
 	 * Se esiste un generatore di randomicità hardware, hash.l contiene, alla fine del ciclo,
-	 * 20 long provenienti dal generatore di entropia hw.
+	 * 5 o 4 unsigned long (rispettivamente nel caso di architetture a 32 e 64 bit)
+	 * provenienti dal generatore di entropia hw.
 	 * hash.l alla fine contiene tutti valori inizializzati attraverso la sorgente hardware.
 	 */
 	for (i = 0; i < LONGS(20); i++) {

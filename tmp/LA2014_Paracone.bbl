@@ -6,6 +6,11 @@ Elaine Barker and John Kelsey.
   random bit generators (revised).
 \newblock {\em Technical Report SP800-90, NIST}, 2007.
 
+\bibitem[EPT15]{kniz}
+work of Matt~Mackall Emanuele~Paracone and Theodore Ts’o.
+\newblock \url{https://github.com/knizontes/random/blob/master/random.c}
+  comment to random.c - untitled, 2015.
+
 \bibitem[Hor13a]{tayl}
 Taylor Hornby.
 \newblock \url{https://twitter.com/defusesec/status/408975222163795969} Twitter

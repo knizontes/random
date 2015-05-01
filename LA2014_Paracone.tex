@@ -65,13 +65,16 @@ dell'implementazione che sono state accolte nelle versioni attuali del kernel.
 \paragraph{}La nostra analisi si concentrerà sulle caratteristiche funzionali
 del LRNG e sulla sua implementazione. Nelle sezioni che seguono diamo una
 descrizione delle sue:
-\begin{enumerate}
+\begin{enumerate} 
   \item struttura;
   \item gestione degli input di entropia esterna;
   \item produzone degli output;
-  \item implementazione dei requisiti di sicurezza;
+  \item implementazione dei requisiti di sicurezza; 
   \item storia ed evoluzione recente.
 \end{enumerate}
+A corredo del lavoro presente esponiamo il codice sorgente di \verb+random.c+ su
+\textbf{github} \cite{kniz} con i nostri commenti al codice (che si distinguono
+da quelli originali perché riportati in lingua italiana).
 
 \section{La Struttura del LRNG}
   
@@ -875,18 +878,21 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
    della pool che iniziano con la parola in posizione $i$, utilizzando $w$ come
    digest:
    \begin{center}
-   $pool\left[i\right]_{512}\leftarrow SHA-1(w, pool\left[i\right]_{512})$
+   $pool\left[i\right]_{512}\leftarrow f_{SHA-1}(w, pool\left[i\right]_{512})$
    \end{center}
    dove $i$ è un cursore inizializzato a zero e incrementato con passo 16 e
    $pool\left[i\right]_{512}$ è il buffer dei 512 bit della \emph{pool}
    dall'inizio della parola in posizione $i$. Da notare che ad ogni iterazione
    vengono anche modificati i valori del digest $w$; 
    \item se l'architettura è \verb+x86+ o \verb+powerPc+, calcola un buffer
-   \verb+l+ composto da 20 \verb+unsigned long+:
+   \verb+l+ composto da 5 o 4 \verb+unsigned long+ (rispettivamente nel caso di
+   architetture a 32 e 64 bit):
    \begin{itemize}
      \item in \verb+x86+, ogni valore è ottenuto da un'invocazione
      dell'istruzione \verb+RdRand+ delle architetture \emph{Intel onchip}, che
-     ritorna un numero casuale dal generatore hardware della CPU;
+     ritorna un numero casuale dal generatore hardware della CPU.\\
+     (\textbf{Nota:} l'uso di \verb+RdRand+ è oggetto di critiche sulla
+     sicurezza come riportato nella sezione \ref{rdrand});
      \item in \verb+powerPc+ il buffer è riempito da valori diversi da zero 
      solo se la linea dell'architettura è la \verb+pSeries+: è il
      caso di server basati sulla virtualizzazione hardware, i valori sono
@@ -894,15 +900,15 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
      dell'\emph{hypervisor} (se ne espone una).
    \end{itemize} 
    \item chiama la \emph{mixing function} per il mixing di $w$ nella
-   \emph{pool} estraendo da essa il buffer $extract$ di 512 bit dei valori
-   della \emph{pool} aggiornati meno di recente dalla routine per il mixing
-   \verb+mix_pool_bytes()+;
+   \emph{pool} estraendo da essa il buffer \verb+extract+ di 512 bit, composto
+   dai valori della \emph{pool} che sono stati aggiornati meno di recente dalla
+   routine per il mixing \verb+mix_pool_bytes()+;
    \item applica uno SHA-1 al buffer estratto usando ancora come digest $w$:
-   quest'operazione è fondamentale per crittografare $extract$ e mascherare i
+   quest'operazione è fondamentale per crittografare \verb+extract+ e mascherare i
    bit prelevati direttamente dalla pool;
-   \item azzera il contenuto del buffer $extract$ (per ragioni di sicurezza,
+   \item azzera il contenuto del buffer \verb+extract+ (per ragioni di sicurezza,
    contenendo bit copiati direttamente dalla \emph{pool});
-   \item mischia i valori di $w$ e li salva nel buffer di output $out$;
+   \item mischia i valori di $w$ e li salva nel buffer di output \verb+out+;
    \item azzera il buffer contenente $w$.
  \end{enumerate}
  
@@ -919,7 +925,7 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
  \emph{pool} che ne ha bisogno.
  Oppure può succedere, al contrario, che il sistema debba accumulare tanta
  entropia da tendere a saturare l'\emph{input pool}: poiché abbiamo visto come
- il meccanismo di accredito di entropia (descritto in \ref{credit}) incrementi
+ il meccanismo di accredito di entropia (descritto in \ref{credit} ) incrementi
  in modo asintotico gli \emph{entropy counter}, è ragionevole pensare che se
  l'\emph{input pool} è sufficientemente ``piena'' sia conveniente ``stipare''
  entropia anche presso le \emph{output pool}.
