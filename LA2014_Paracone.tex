@@ -704,7 +704,7 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
    \newline Consideriamo che se $0\leq x\leq\frac{1}{2}$, allora
    $\frac{(1-e^{-x})}{x}\geq
    \frac{(1-e^{-\frac{1}{2}})}{\frac{1}{2}} = 0.7869386805747332$.
-   \newline Quando $add\_entropy\leq\frac{pool\_size}{2}$ possiamo
+   \newline Quando $add\_entropy\leq\frac{pool\_size}{2}$, possiamo
    quindi approssimare per difetto il termine
    $(1-e^{\frac{-add\_entropy}{pool\_size}})$ con $(\frac{add\_entropy}
    {pool\_size})*0.7869\ldots$, sapendo che
@@ -732,13 +732,17 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
    stata inizializzata, viene configurata come inizializzata. Nel caso in cui la
    \emph{pool} in esame sia la \emph{nonblocking}, viene invocata una routine
    (\verb+prandom_reseed_late()+) che ne inizializza il buffer interno con dei
-   valori (ottenuti tramite l'invocazione di \verb+get_random_bytes()+, quindi
-   originati dalla \emph{pool} stessa).
+   valori di 4 bytes senza segno (ottenuti tramite l'invocazione di
+   \verb+get_random_bytes()+, quindi originati dalla stessa \emph{pool
+   nonblocking}).
    \item step finali nel caso la \emph{pool} in esame sia la \emph{input pool}: 
        \begin{enumerate}
          \item se il numero di bytes di entropia della \emph{pool} è superiore
-         della soglia opportuna (64 bytes), sveglia i thread in attesa di
-         lettura;
+         della soglia opportuna (64 bytes), cambia il flag di polling delle
+         \emph{file operations} consentite sul device file \verb+random+ per
+         segnalare la possibilità di accesso non bloccante ai processi in attesa
+         di lettura (per il polling su \verb+random+ rimandiamo alla sezione
+         \ref{outputUtente});
          \item se la stima di entropia presso l'\emph{input pool} è maggiore di
          $7/8$ della capacità complessiva della \emph{pool}, schedula
          alternatamente la \emph{nonblocking pool} e la \emph{blocking pool}
@@ -758,9 +762,9 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
  la mixing function è una "buona funzione hash non crittografica" \cite{lach}.
  In assenza di input, essa è equivalente ad un \emph{registro a scorrimento a
  retroazione lineare} (\emph{linear feedback shift register} o \emph{LFSR})
- definito su un campo finito di $2^{32}$ elementi ($GF(2^{32})$), con polinomio
- di feedback $Q(X)=\alpha^3(P(X)-1)+1$ (con $\alpha$ primitiva di $GF(2^{32})$)
- e basato sui polinomi $P(X)$:
+ definito su un campo finito (o campo di Galois) di $2^{32}$ elementi
+ ($GF(2^{32})$), con polinomio di feedback $Q(X)=\alpha^3(P(X)-1)+1$ (con
+ $\alpha$ primitiva di $GF(2^{32})$) e basato sui polinomi $P(X)$:
  \begin{center}
  $P(X)=X^{128}+X^{104}+X^{76}+X^{51}+X^{25}+X+1$ per la \emph{input pool};
  $P(X)=X^{32}+X^{26}+X^{19}+X^{14}+X^{7}+X+1$ per le \emph{output pool}.
@@ -775,8 +779,8 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
  operazioni:
  \begin{enumerate}
    \item viene prelevato il byte corrente assieme ai 3 byte che lo seguono.
-   Ottaniamo una parola $w$ di 4 bytes che viene ruotata del numero
-   \verb+input_rotate+ di posizioni specificato dalla pool;
+   Otteniamo una parola $w$ di 4 bytes che viene ruotata del numero
+   \verb+input_rotate+ di posizioni (in bit) specificato dalla pool;
    \item viene inizializzato un cursore $i$ con la posizione del
    predecessore dell'ultima parola modificata della \emph{pool};
    \item viene effettuato il calcolo del polinomio $P(X)-1$ per $X=w$
@@ -786,9 +790,10 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
    \end{center}
    dove $i$ è la posizione di una parola di 4 bytes della pool e $tap_j$ è la
    potenza j-esima del polinomio $P(X)$ (di cui non consideriamo la potenza 0
-   a causa dell'addendo $-1$ in $P(X)-1$), ovvero $\forall tap_j \in \left\{128,
-   104, 76, 51, 25, 1 \right\}$ nel caso della \emph{input pool} ($\forall tap_j
-   \in \left\{32, 26, 19, 14, 7, 1 \right\}$ nel caso delle \emph{output pool}).
+   a causa dell'addendo $-1$ in $P(X)-1$); tale operazione viene applicata 
+   $\forall\ tap_j \in \left\{128, 104, 76, 51, 25, 1 \right\}$ nel caso della
+   \emph{input pool} ($\forall tap_j \in \left\{32, 26, 19, 14, 7, 1 \right\}$
+   nel caso delle \emph{output pool}).
    \item viene aggiornata l'i-esima parola della pool con 
    $\alpha^3\left(P(X)-1\right)-1$:
    \begin{center}
@@ -848,9 +853,9 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
  
  
  \subsection{Estrazione di un buffer dalla \emph{pool}}\label{estrazionebuffer}
- L'estrazione di un buffer, ovviamente, non consiste nel
- ritornare una porzione più o meno lunga del buffer interno della \emph{pool},
- ma nella produzione di un hash a partire dai dati presenti nella stessa.
+ L'estrazione di un buffer, ovviamente, non consiste nell'ottenere
+ direttamente una porzione più o meno lunga del buffer interno della
+ \emph{pool}, quanto piuttosto un suo hash crittograficamente ``robusto''.
  Come abbiamo già affermato in \ref{aggiuntaentropia}, questo è il passaggio più
  delicato in termini di sicurezza e la sua affidabilità è delegata totalmente
  all'adozione della funzione crittografica SHA-1. 
@@ -1111,7 +1116,7 @@ bytes pari a quello specificato per parametro nel modo seguente:
  contatore dei \emph{jiffies} e del contatore di cicli se implementato.
  
   
-\subsubsection{Output nello spazio utente}
+\subsubsection{Output nello spazio utente}\label{outputUtente}
  
  Sappiamo che le interfacce per gli output (ma anche gli input) del LRNG nello
  spazio utente sono i due device files \verb+/dev/random+ e \verb+/dev/urandom+:
