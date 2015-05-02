@@ -886,7 +886,8 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
    vengono anche modificati i valori del digest $w$; 
    \item se l'architettura è \verb+x86+ o \verb+powerPc+, calcola un buffer
    \verb+l+ composto da 5 o 4 \verb+unsigned long+ (rispettivamente nel caso di
-   architetture a 32 e 64 bit):
+   architetture a 32 e 64 bit) tramite la chiamata a
+   \verb+arch_get_random_long()+:
    \begin{itemize}
      \item in \verb+x86+, ogni valore è ottenuto da un'invocazione
      dell'istruzione \verb+RdRand+ delle architetture \emph{Intel onchip}, che
@@ -1472,15 +1473,23 @@ which is impossible to audit is a BAD idea.﻿}»
  processori \verb+x86+, pubblicando contestualmente l'immagine del codice
  dell'hacking e del suo effetto su \verb+/dev/urandom+. Oltre a ciò, sempre
  Hornby pubblica un suo commento al codice (\cite{tayl2}) in cui mette in
- rilievo alcune contraddizioni dei commenti originali: fra questi, vogliamo rilevare in
+ rilievo alcune contraddizioni dei commenti originali; fra questi, vogliamo rilevare in
  particolare il commento alla routine \verb+get_random_bytes()+ dove
  si evidenzia la non veridicità dell'affermazione, presente nel codice, sul non
- uso di generatori hardware di numeri randomici. Come abbiamo verificato noi
+ uso di generatori hardware di numeri randomici: 
+ \begin{center}
+ «\emph{This function is the exported kernel interface.\\  It returns some
+ number of good random numbers,\\ suitable for key generation, seeding
+ TCP sequence numbers, etc.\\ \textbf{It does not use the hw random number
+ generator, if available;}\\ use get\textunderscore{}random\textunderscore{}bytes\textunderscore{}arch() for
+ that.}»
+ \end{center}
+ \paragraph{}Come abbiamo avuto modo di verificare noi
  stessi nel presente lavoro (nelle sezioni \ref{estrazionebuffer} e 
  \ref{kerneloutput}), nelle architetture \verb+x86+ \emph{Intel onchips} viene
  in effetti fatto uso del generatore hardware presente nei chipset durante
  l'estrazione di un buffer di bytes randomici dalle \emph{pool} (la
- chiamata \verb+RDRAND+ corrisponde nel kernel a \verb+get_get_random()+).
+ chiamata \verb+RDRAND+ corrisponde nel kernel a \verb+get_random()+).
  Le nostre osservazioni pertanto confortano quanto affermato da Hornby.
  \paragraph{}L'hacking compiuto da Hornby però non sembra essere applicabile per
  le versioni del kernel successive alla 3.12.3 ma, come lui stesso afferma, è
