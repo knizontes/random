@@ -167,17 +167,18 @@ e aggiungono entropia al generatore in modo asincrono e
  crittograficamente robusta), mentre, quando viene trasferita entropia
  dalla input pool verso una output pool o vengono generati bit dalle output
  pool, il LRNG fa uso della primitiva crittografica SHA-1. \\
- È facile convincersi dei benefici introdotti da questa disparità, in quanto
+  È facile convincersi dei benefici introdotti da questa disparità, in quanto
  l'aggiunta di entropia rimane un'operazione veloce nonostante gli
  \emph{entropy input} abbiano un tasso di arrivo elevato (e maggiore di vari
  ordini di grandezza rispetto al tasso con cui mediamente sono richiesti gli
- output).\\
+ output).\\ 
  Anche se ci proponiamo di definire più avanti il concetto di ``sicurezza''
  riferito al LRNG, vogliamo già dare risalto al fatto che la segretezza
  dello stato interno risieda fondamentalmente nell'adozione di SHA-1 per la
  produzione degli output.
  
-   \centerline{\includegraphics[width=150mm]{img/Sha1.png}}
+   
+  \centerline{\includegraphics[width=150mm]{img/Sha1.png}}
  
  
  \paragraph{}Ogni volta che viene aggiunta dell'entropia presso una pool, viene
@@ -253,7 +254,11 @@ e aggiungono entropia al generatore in modo asincrono e
  
  \paragraph{} Ogni volta che viene richiesto un output (o un trasferimento di
  entropia) e subito prima della consegna dell'output, viene aggiornato lo stato
- interno della pool coninvolta attraverso un meccanismo di retroazione.
+ interno della pool coninvolta attraverso un meccanismo di retroazione (o
+ \emph{feedback}).
+ 
+   \centerline{\includegraphics[width=120mm]{img/feedback.png}}
+ 
  
  \paragraph{}Notiamo anche che non esistano interfacce kernel per i bytes
  prodotti dalla \emph{blocking pool}: i bytes di alta qualità sono pertanto destinati
@@ -261,7 +266,7 @@ e aggiungono entropia al generatore in modo asincrono e
  Eventuali dispositivi hardware per la generazione di numeri
  randomici sono esposti sia verso l'user space -- tramite il device driver
  \verb+hwrng+-- che verso il kernel space -- tramite il simbolo esportato 
- \verb+get_random_bytes_arch+ . Può verificarsi inoltre che un'applicazione
+ \verb+get_random_bytes_arch()+. Può verificarsi inoltre che un'applicazione
  nello spazio utente utilizzi gli output generati da quest'ultimo tipo di
  driver, se la sorgente è trusted, per aumentare l'affidabilità dei numeri
  generati dal \emph{LRNG}, in quanto è possibile sommare un
@@ -338,12 +343,9 @@ strutture \verb+file_operations random_fops+ e \\\verb+urandom_fops+.
 Dopo aver introdotto gli ingredienti principali che costituiscono il generatore,
 vediamo ora come interagiscono fra di loro.
 
-[SCHEMA POOL, INPUT, MIXING FUNCTION, OUTPUT]
-
-[DA FINIRE DOPO AVER TERMINATO LE SEZIONI SU INPUT E OUTPUT] 
   
  \section{L'Input}
- Gli input iniettati presso il LRNG possono essere solo di due tipi:
+ Gli input immessi nel LRNG possono essere solo di due tipi:
 \begin{enumerate}
   \item seed aggiunto al generatore direttamente dallo spazio utente
   (\ref{poolACosaServono}).
@@ -358,7 +360,12 @@ vediamo ora come interagiscono fra di loro.
  Come visto in \ref{devicefiles}, l'operazione di scrittura di un buffer
  direttamente presso i device files \verb+/dev/random+ e \verb+/dev/urandom+
  comporta un reseeding dello stato interno del generatore a partire da un hash
- del buffer stesso. Tale operazione è incoraggiata nell'header di
+ del buffer stesso. 
+ 
+    \centerline{\includegraphics[width=120mm]{img/bufferRW.png}}
+ 
+ 
+ Tale operazione è incoraggiata nell'header di
  \verb+random.c+, dove viene specificato che, per differenziare gli output
  prodotti in prossimità del momento del boot della macchina, è opportuna
  l'esecuzione di uno script all'avvio che scriva presso \verb+random+ o
@@ -434,9 +441,8 @@ vediamo ora come interagiscono fra di loro.
  che non viene memorizzato in quanto calcolato al momento della stima
  dell'entropia per l'\emph{entropy input} in analisi (\ref{stimaInput}).
  
- Vediamo nel dettaglio ciascuna delle interfacce di input (di cui è presente una 
- prima descrizione direttamente nell'header di \verb+random.c+).
- ra \cite{mack}.\\ 
+ Vediamo nel dettaglio ciascuna delle interfacce di input (una loro descrizione
+ è rintracciabile anche nell'header di \verb+random.c+ \cite{mack}).\\
  
  
  \paragraph{}\verb+add_device_randomness()+ serve a differenziare 
