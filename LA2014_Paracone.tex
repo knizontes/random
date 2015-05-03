@@ -452,19 +452,12 @@ vediamo ora come interagiscono fra di loro.
  il \emph{real-time clock} (\emph{RTC}). 
  È utile in particolare per differenziare gli output di dispositivi con poca
  entropia (caso frequente nel caso di dispositivi embedded e/o privi di dischi, 
- schede di rete, ecc.). 
- \newline Notiamo come il contributo di questa routine nell'aggiornare lo
- stato interno è sostanzialmente deterministico e identico per ogni boot del kernel,
- motivo per cui non viene considerato alcun aumento dell'entropia del
- generatore. \newline
- Riteniamo che la possibilità che dispositivi tra loro identici abbiano un tempo
- di boot a sua volta identico sia il motivo per cui la funzione
- \verb+get_cycles()+ è implementata solo da alcune architetture.
- In particolare, \verb+get_cycles()+ ritorna un valore diverso da zero solo in
- presenza di un \emph{Time Stamp Counter} (\emph{TSC}), implementato
- quasi esclusiva delle architetture \verb+x86+. Nel caso in cui
- \verb+get_cycles()+ ritorni zero, l'unico contributo basato sul tempo
- dell'evento proviene dal valore di jiffies.
+ schede di rete, ecc.). \newline
+ Durante l'aggiornamento viene chiamata la funzione \verb+get_cycles()+, che
+ ritorna un valore diverso da zero solo in presenza di un \emph{Time Stamp
+ Counter} (\emph{TSC}), implementato quasi in esclusiva nelle architetture
+ \verb+x86+. Nel caso in cui \verb+get_cycles()+ ritorni zero, l'unico
+ contributo basato sul tempo dell'evento proviene dal valore di jiffies.
  
  
  \paragraph{} \verb+add_input_randomness()+ aggiunge entropia a partire dagli
@@ -492,10 +485,10 @@ vediamo ora come interagiscono fra di loro.
  ovvero non sortiscono alcun effetto e la funzione ritorna.
  
  \paragraph{} \verb+add_interrupt_randomness()+ aggiunge un
- \emph{entropy input} a partire da un'\verb+irq+. L'aggiunta di entropia avviene
- attraverso quattro passi:
+ \emph{entropy input} a partire da un'\verb+irq+. 
+ L'aggiunta di entropia avviene attraverso quattro passi:
  \begin{enumerate}
-   \item Viene creato un array, \textbf{input}, di 4 parole da 32 bit, ottenute
+   \item Viene creato un array, \verb+input+, di 4 parole da 32 bit, ottenute
    attraverso un mixing elementare (xor) dei valori di \emph{cycles} e di \emph{jiffies},
    l'identificativo dell'\emph{irq} e il valore dell'\emph{instruction pointer}
    (che punta all'istruzione successiva all'esecuzione dell'interruzione). Nel
@@ -510,7 +503,10 @@ vediamo ora come interagiscono fra di loro.
    valori dei registri della cpu al momento della chiamata dell'interruzione. 
    La funzione di mixing adottata è \verb+fast_mix()+, che mischia i valori alla
    \verb+fast_pool+ facendo uso di una speciale tabella per il mixing
-   \verb+twist_table+. Se l'ultimo aggiornamento visto dalla
+   \verb+twist_table+.\\
+       \centerline{\includegraphics[width=120mm]{img/fast_pool.png}} 
+   
+   Se l'ultimo interrupt visto dalla
    CPU è troppo recente rispetto all'\emph{interrupt request} attuale, la
    routine \verb+add_interrupt_randomness+ ritorna, sortendo come unico effetto
    un aggiornamento di \verb+irq_randomness+.
@@ -521,7 +517,8 @@ vediamo ora come interagiscono fra di loro.
    \item Viene accreditata una stima di entropia pari a 1 bit presso la
    \emph{entropy pool} selezionata al passo 3. Tale accreditamento viene omesso
    nel caso in cui non vi sia un contatore di cicli valido per l'architettura
-   specifica oppure se si osservano timer interrupt consecutivi.
+   specifica oppure se si osservano timer interrupt consecutivi (l'accredito è
+   analizzato più nel dettaglio in \ref{stimaInput}).
  \end{enumerate} 
 
  
@@ -546,7 +543,7 @@ Si basa su due assunzioni:
   presso il generatore.
 \end{itemize}  
 \paragraph{} Sappiamo già (da \ref{interfacceoutput} e \ref{pool} ) che sebbene
-il conteggio dell'entropia accumulata nelle pool (conteggiata negli
+il conteggio dell'entropia accumulata nelle pool (mantenuto negli
 \emph{entropy counter} di ciascuna) entri in gioco per la produzione di
 qualsiasi output, nel caso degli output prodotti dalla \emph{input} e
 \emph{blocking pool} è la condizione in base alla quale il LRNG sceglie se
@@ -577,7 +574,8 @@ esterna: riportiamo un esempio interessante in questo senso nella sezione
 \ref{rdrand} riguardante le vulnerabilità di \emph{RdRand}.
 
 \subsubsection{Assunzioni e vincoli per l'\emph{entropy
-estimator}}\label{vincoliStima} Prima di analizzare com'è implementato
+estimator}}\label{vincoliStima} 
+Prima di analizzare com'è implementato
 l'\emph{entropy estimator}, diamo ragione brevemente delle assunzioni e dei
 vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
 \cite{lach}, a partire dai quali ha preso forma l'implementazione attuale.
@@ -654,8 +652,9 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
  routine la stima viene effettuata attraverso la chiamata ad una terza funzione,
  \verb+add_timer_randomness(),+ che si occupa dell'aggiunta dell'entropia presso
  le pool, effettua una stima dell'entropia basata sui primi tre ordini di delta
- e prova a accreditare la misura stimata presso l'\emph{entropy counter}
- corretto.\newline{}Ogni ordine di $\delta$ è calcolato nel modo seguente:
+ ($\delta$) e prova a accreditare la misura stimata presso l'\emph{entropy
+ counter} corretto.\newline{}Ogni ordine di $\delta$ è calcolato nel modo
+ seguente:
  \begin{enumerate}
    \item $\delta$ (nel codice sorgente, \verb+delta+) è pari al tempo di
    interarrivo tra gli ultimi due input, ovvero tra quello corrente e il suo
