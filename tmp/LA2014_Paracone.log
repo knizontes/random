@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.7.10)  2 MAY 2015 16:55
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.7.10)  3 MAY 2015 12:19
 entering extended mode
  restricted \write18 enabled.
  Source specials enabled.
@@ -246,6 +246,23 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 (/usr/share/texlive/texmf-dist/tex/latex/marvosym/marvosym.sty
 Package: marvosym 2011/07/20 v2.2 Martin Vogel's Symbols font definitions
 )
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/graphics.cfg
+File: graphics.cfg 2010/04/23 v1.9 graphics configuration of TeX Live
+)
+Package graphics Info: Driver file: pdftex.def on input line 91.
+)
+\Gin@req@height=\dimen112
+\Gin@req@width=\dimen113
+)
 (./LA2014_Paracone.aux)
 \openout1 = `LA2014_Paracone.aux'.
 
@@ -282,13 +299,13 @@ italian.ldf    on input line 26.
 (/usr/share/texlive/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count113
-\scratchdimen=\dimen112
+\scratchdimen=\dimen114
 \scratchbox=\box28
 \nofMPsegments=\count114
 \nofMParguments=\count115
 \everyMPshowfont=\toks21
 \MPscratchCnt=\count116
-\MPscratchDim=\dimen113
+\MPscratchDim=\dimen115
 \MPnumerator=\count117
 \makeMPintoPDFobject=\count118
 \everyMPtoPDFconversion=\toks22
@@ -311,6 +328,22 @@ LaTeX Info: Redefining \nameref on input line 26.
 \@outlinefile=\write3
 \openout3 = `LA2014_Paracone.out'.
 
+
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
+Package: epstopdf-base 2010/02/09 v2.5 Base part for package epstopdf
+
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/grfext.sty
+Package: grfext 2010/08/19 v1.1 Manage graphics extensions (HO)
+)
+Package grfext Info: Graphics extension search list:
+(grfext)             [.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPE
+G,.JBIG2,.JB2,.eps]
+(grfext)             \AppendGraphicsExtensions on input line 452.
+
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+))
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <12> on input line 28.
 LaTeX Font Info:    External font `cmex10' loaded for size
@@ -340,15 +373,26 @@ up above has ended a previous alignment prematurely,
 you're probably due for more error messages, and you
 might try typing `S' now just to see what is salvageable.
 
+<img/entropy_sources.png, id=189, 1240.635pt x 732.7375pt>
+File: img/entropy_sources.png Graphic file (type png)
 
-Underfull \hbox (badness 10000) in paragraph at lines 95--95
+<use img/entropy_sources.png>
+Package pdftex.def Info: img/entropy_sources.png used on input line 90.
+(pdftex.def)             Requested size: 426.79134pt x 252.06796pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 89--91
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 97--97
 
  []
 
 ! Misplaced alignment tab character &.
 \knizPar ...dth }{\footnotesize \textbf {#1\\#2}}&
                                                   \parbox [t]{0.85\textwidth...
-l.95 ...atore a seguito di un input di entropia. }
+l.97 ...atore a seguito di un input di entropia. }
                                                   
 I can't figure out why you would want to use a tab mark
 here. If you just want an ampersand, the remedy is
@@ -360,7 +404,7 @@ might try typing `S' now just to see what is salvageable.
 ! Misplaced alignment tab character &.
 \knizPar ...dth }{\footnotesize \textbf {#1\\#2}}&
                                                   \parbox [t]{0.85\textwidth...
-l.115  }
+l.117  }
         
 I can't figure out why you would want to use a tab mark
 here. If you just want an ampersand, the remedy is
@@ -369,86 +413,100 @@ up above has ended a previous alignment prematurely,
 you're probably due for more error messages, and you
 might try typing `S' now just to see what is salvageable.
 
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 115.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 117.
 
 (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 115.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 117.
 
-Underfull \hbox (badness 10000) in paragraph at lines 89--116
+Overfull \hbox (14.99998pt too wide) in paragraph at lines 97--118
+[][][][] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 97--118
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 89--116
+Underfull \hbox (badness 10000) in paragraph at lines 97--118
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 89--116
+Underfull \hbox (badness 10000) in paragraph at lines 97--118
+
+ []
+
+[2 <./img/entropy_sources.png>]
+<img/internal_state.png, id=202, 1240.635pt x 732.7375pt>
+File: img/internal_state.png Graphic file (type png)
+
+<use img/internal_state.png>
+Package pdftex.def Info: img/internal_state.png used on input line 128.
+(pdftex.def)             Requested size: 426.79134pt x 252.06796pt.
+ [3 <./img/internal_state.png>]
+<img/Sha1.png, id=215, 1235.61626pt x 776.9025pt>
+File: img/Sha1.png Graphic file (type png)
+ <use img/Sha1.png>
+Package pdftex.def Info: img/Sha1.png used on input line 180.
+(pdftex.def)             Requested size: 426.79134pt x 268.35172pt.
+ [4]
+[5 <./img/Sha1.png>] [6]
+Underfull \hbox (badness 10000) in paragraph at lines 297--299
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 89--116
+LaTeX Warning: Reference `pushtopool' on page 7 undefined on input line 305.
+
+[7] [8]
+Underfull \hbox (badness 10000) in paragraph at lines 437--440
 
  []
 
-[2] [3] [4]
-Underfull \hbox (badness 10000) in paragraph at lines 288--290
-
- []
-
-
-LaTeX Warning: Reference `pushtopool' on page 5 undefined on input line 296.
-
-[5] [6]
-Underfull \hbox (badness 10000) in paragraph at lines 428--431
-
- []
-
-[7] [8] [9] [10] [11] [12] [13] [14] [15]
-Overfull \hbox (32.46603pt too wide) in paragraph at lines 1003--1009
+[9] [10] [11] [12] [13] [14] [15] [16]
+Overfull \hbox (32.46603pt too wide) in paragraph at lines 1012--1018
  [][] []\OT1/cmr/m/n/10 La rou-ti-ne che vie-ne sche-du-la-ta da []\OT1/cmtt/m/
 n/10 credit_entropy_bits() \OT1/cmr/m/n/10 per bi-lan-cia-re l'en-tro-pia in ec
 -ces-so ^^Re []\OT1/cmtt/m/n/10 push_to_pool()\OT1/cmr/m/n/10 ,
  []
 
 
-Overfull \hbox (0.21779pt too wide) in paragraph at lines 1003--1009
+Overfull \hbox (0.21779pt too wide) in paragraph at lines 1012--1018
 \OT1/cmr/m/n/10 pun-ta-ta dal cam-po []\OT1/cmtt/m/n/10 push_work \OT1/cmr/m/n/
 10 del-la strut-tu-ra []\OT1/cmtt/m/n/10 entorpy_store \OT1/cmr/m/n/10 che mo-d
 el-la le \OT1/cmr/m/it/10 pool \OT1/cmr/m/n/10 di out-put. []\OT1/cmtt/m/n/10 p
 ush_to_pool()
  []
 
-[16] [17]
-Overfull \hbox (7.29219pt too wide) in paragraph at lines 1171--1190
+[17] [18] [19]
+Overfull \hbox (7.29219pt too wide) in paragraph at lines 1180--1199
  []\OT1/cmr/bx/n/10 Lettura da /de-v/-ran-dom:[] []\OT1/cmr/m/n/10 La fun-zio-n
 e ad-det-ta al-l'o-pe-ra-zio-ne di let-tu-ra su []\OT1/cmtt/m/n/10 /dev/random 
 \OT1/cmr/m/n/10 ^^Re []\OT1/cmtt/m/n/10 random_read()\OT1/cmr/m/n/10 ,
  []
 
-[18] [19]
-Underfull \hbox (badness 10000) in paragraph at lines 1330--1354
+[20] [21]
+Underfull \hbox (badness 10000) in paragraph at lines 1339--1363
 
  []
 
-[20] [21]
-LaTeX Font Info:    Try loading font information for U+mvs on input line 1441.
- (/usr/share/texlive/texmf-dist/tex/latex/marvosym/umvs.fd)
+[22]
+LaTeX Font Info:    Try loading font information for U+mvs on input line 1450.
+ (/usr/share/texlive/texmf-dist/tex/latex/marvosym/umvs.fd) [23]
 (/usr/share/texlive/texmf-dist/tex/latex/ucs/data/uni-254.def
 File: uni-254.def 2013/05/13 UCS: Unicode data U+FE00..U+FEFF
-) [22]
+) [24]
 (./LA2014_Paracone.bbl
 Underfull \hbox (badness 1184) in paragraph at lines 4--8
 [][]\OT1/cmr/m/n/10 Elaine Bar-ker and John Kel-sey.  Re-com-men-da-tion for ra
 n-dom num-ber ge-ne-ra-tion using
  []
 
-[23] (/usr/share/texlive/texmf-dist/tex/latex/ucs/data/uni-32.def
+(/usr/share/texlive/texmf-dist/tex/latex/ucs/data/uni-32.def
 File: uni-32.def 2013/05/13 UCS: Unicode data U+2000..U+20FF
 )
 Underfull \hbox (badness 1460) in paragraph at lines 29--34
@@ -457,12 +515,12 @@ cmtt/m/n/10 http : / / www . nytimes . com / 2013 / 09 / 06 / us /
  []
 
 )
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1549.
- [24]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1549.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1558.
+ [25]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1558.
  (./LA2014_Paracone.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1549.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1549.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1558.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1558.
 
 Package rerunfilecheck Info: File `LA2014_Paracone.out' has not changed.
 (rerunfilecheck)             Checksum: 4B76A37BCF33E8E7B5F5951B46C921A1;2896.
@@ -472,13 +530,13 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 9003 strings out of 495017
- 124595 string characters out of 6181021
- 223700 words of memory out of 5000000
- 11912 multiletter control sequences out of 15000+600000
+ 9290 strings out of 495017
+ 129201 string characters out of 6181021
+ 226118 words of memory out of 5000000
+ 12172 multiletter control sequences out of 15000+600000
  10692 words of font info for 37 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 29i,6n,37p,801b,480s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 29i,6n,37p,801b,511s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
 e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr/share/texli
@@ -498,10 +556,10 @@ e/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf
 fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/
 type1/public/amsfonts/cm/cmtt12.pfb></usr/share/texlive/texmf-dist/fonts/type1/
 public/marvosym/marvosym.pfb>
-Output written on LA2014_Paracone.pdf (24 pages, 340394 bytes).
+Output written on LA2014_Paracone.pdf (25 pages, 581900 bytes).
 PDF statistics:
- 648 PDF objects out of 1000 (max. 8388607)
- 596 compressed objects within 6 object streams
- 227 named destinations out of 1000 (max. 500000)
- 305 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 661 PDF objects out of 1000 (max. 8388607)
+ 601 compressed objects within 7 object streams
+ 228 named destinations out of 1000 (max. 500000)
+ 320 words of extra memory for PDF output out of 10000 (max. 10000000)
 
