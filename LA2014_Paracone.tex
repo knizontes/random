@@ -6,6 +6,7 @@
 \usepackage{fullpage}
 \usepackage{xcolor}
 \usepackage{hyperref}
+\usepackage{marvosym}
 
 
 
@@ -817,6 +818,7 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
  \begin{center}
  [IMMAGINE MIXING FUNCTION]
  \end{center}
+ 
  \paragraph{}I polinomi caratteristici attuali sono costruiti in modo da
  garantire, nel caso non vi siano input di entropia, il massimo periodo per gli output di LRNG.
  Condizione necessaria e sufficiente perché il periodo sia massimo è la
@@ -827,11 +829,12 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
  \newline Per una descrizione più approfondita, rimandiamo il lettore alla
  sezione \ref{mixingfunctionchanges} sulla storia di alcuni cambiamenti del
  codice.
+ 
  \section{L'Output}
  La produzione degli output necessita di un meccanismo per l'estrazione
  dell'entropia che mantenga intatta la sicurezza del generatore. Per
  garantire il rispetto dei vincoli di sicurezza definiti nella sezione
- \ref{sicurezza} il LRNG fa uso di SHA-1 () per ``mascherare'' i bytes dello
+ \ref{sicurezza} il LRNG fa uso di SHA-1 per ``mascherare'' i bytes dello
  stato interno utilizzati per l'estrazione di entropia rispetto ai bytes in
  output prodotti.
  \paragraph{}In questa sezione analizziamo l'estrazione di entropia in funzione
@@ -839,13 +842,14 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
  \begin{enumerate}
    \item dalle \emph{output pool} vengono prodotti bytes in output ogni
  volta che viene invocata una tra le interfacce di output descritte in
- \ref{interfacceoutput};
+ \ref{interfacceoutput} ;
  \item dall'\emph{input pool}, quando è disponibile, viene
  estratta entropia 
  \begin{itemize}
-   \item ogni volta che si esaurisce quella contenuta nelle \emph{pool} di
-   output;
-   \item quando l'\emph{input pool} è satura per più del 75\%.
+   \item ogni volta che vengono richiesti bytes in output dalle
+   \emph{pool} di output e queste non hanno sufficiente entropia;
+   \item quando l'\emph{input pool} è satura per più di $\frac{7}{8}$ e almeno
+   una delle \emph{pool} secondarie è satura meno del 75\%.
  \end{itemize}
  \end{enumerate}
  In particolare, nel primo caso sono generati bytes di entropia per produrre un
@@ -888,18 +892,17 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
    \verb+l+ composto da 5 o 4 \verb+unsigned long+ (rispettivamente nel caso di
    architetture a 32 e 64 bit) tramite la chiamata a
    \verb+arch_get_random_long()+:
-   \begin{itemize}
+   \begin{enumerate}
      \item in \verb+x86+, ogni valore è ottenuto da un'invocazione
      dell'istruzione \verb+RdRand+ delle architetture \emph{Intel onchip}, che
-     ritorna un numero casuale dal generatore hardware della CPU.\\
-     (\textbf{Nota:} l'uso di \verb+RdRand+ è oggetto di critiche sulla
-     sicurezza come riportato nella sezione \ref{rdrand});
+     ritorna un numero casuale dal generatore hardware della
+     CPU;\label{rdrandPoint}
      \item in \verb+powerPc+ il buffer è riempito da valori diversi da zero 
      solo se la linea dell'architettura è la \verb+pSeries+: è il
      caso di server basati sulla virtualizzazione hardware, i valori sono
      ottenuti attraverso una chiamata all'interfaccia \verb+H_RANDOM+
      dell'\emph{hypervisor} (se ne espone una).
-   \end{itemize} 
+   \end{enumerate} 
    \item chiama la \emph{mixing function} per il mixing di $w$ nella
    \emph{pool} estraendo da essa il buffer \verb+extract+ di 512 bit, composto
    dai valori della \emph{pool} che sono stati aggiornati meno di recente dalla
@@ -912,6 +915,12 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
    \item mischia i valori di $w$ e li salva nel buffer di output \verb+out+;
    \item azzera il buffer contenente $w$.
  \end{enumerate}
+ 
+ \paragraph{Nota:}Vogliamo evidenziare qui come il punto \ref{rdrandPoint} sia
+ in contraddizione con quano affermato dal commento al codice, in cui si afferma
+ di non fare alcun uso dei generatori hardware al momento dell'estrazione del
+ buffer dalle \emph{pool}. Esamineremo questo fatto nel paragrafo \ref{rdrand}
+ su \verb+RdRand+ assieme alle critiche di cui è oggetto.
  
  \subsection{Il trasferimento di entropia}\label{trasferimentoentropia}
  Il LRNG implementa alcuni meccanismi atti a bilanciare la quantità di
@@ -955,8 +964,8 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
  affidabili. 
  
  \paragraph{Controllo sulla disponibilità di entropia corrente:} Per evitare
- che vengano tolti bytes di entropia dalla \emph{input pool} la routine
- controlla, prima di trasferire effettivamente i bytes tramite
+ che vengano tolti inutilmente bytes di entropia dalla \emph{input pool}, la
+ routine controlla, prima di trasferire effettivamente i bytes tramite
  \verb+_xfer_entropy_pool()+, che nella \emph{pool} corrente vi sia meno
  entropia di quella richiesta. \\Continuiamo la descrizione di
  \verb+xfer_entropy_pool()+ attraverso quella di \verb+_xfer_entropy_pool()+.
@@ -1182,7 +1191,7 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
  
  
  \paragraph{Lettura da /dev/urandom:} La lettura degli output dal device file
- \verb+dev/urandom+ è definita dalla routine \verb+urandom_read()+, che si
+ \verb+/dev/urandom+ è definita dalla routine \verb+urandom_read()+, che si
  limita a eseguire \verb+extract_entropy_user()+ sulla \emph{nonblocking pool}
  per estrarre i bytes richiesti in output e consegnarli direttamente allo spazio
  utente. 
@@ -1205,8 +1214,8 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
    \verb+random_read()+ prova a trasferire un altro chunk di massimo 512
    bytes, iterando fino al completamento della richiesta;
    \item 0 se non c'è entropia nelle \emph{pool}: in questo caso il
-   comportamento di \verb+random+ dipende da come è stato impostato il flag
-   \verb+O_NONBLOCK+ che, nel caso di \verb+random+, è
+   comportamento di \verb+/dev/random+ dipende da come è stato impostato
+   il flag \verb+O_NONBLOCK+ che, nel caso di \verb+random+, è
    \emph{device specific}(\cite{kerr}):
    \begin{enumerate}
      \item se attivo, una \verb+random_read()+ ritorna immediatamente con un
@@ -1227,11 +1236,11 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
  in questo caso infatti essa copia nel buffer dello spazio utente esattamente
  il numero di bytes randomici richiesti a prescindere da quanti bytes sono
  conteggiati negli \emph{entropy count} dell'\emph{input pool} e della 
- \emph{nonblocking pool}. Questo è possibile per come la routine
- \verb+account()+ (\ref{account}) su cui si basa \verb+extract_entropy_user()+,
+ \emph{nonblocking pool}. Questo è possibile perché la routine
+ \verb+account()+ (\ref{account}), su cui si basa \verb+extract_entropy_user()+,
  oltre ad aggiornare l'\emph{entropy counter} distingue a sua volta tra
- \emph{pool} bloccanti e non bloccante ritornando nel primo caso con il numero
- di bytes di entropia estraibili e nel secondo con il numero stesso di
+ \emph{pool} bloccanti e non bloccante ritornando, nel primo caso, con il numero
+ di bytes di entropia estraibili e, nel secondo, con il numero stesso di
  bytes richiesti. In questo modo \verb+extract_entropy_user()+, chiamata sulla
  \emph{nonblocking pool}, preleva da essa un hash esattamente della dimensione
  desiderata ignorando la quantità di entropia che contiene.
@@ -1241,7 +1250,7 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
  \section{Sicurezza nel LRNG}\label{sicurezza}
  In questa sezione diamo una rapida panoramica di come sono implementati
  i requisiti di sicurezza nel LRNG, mentre per il lettore alla ricerca di una
- descrizione più approfondita rimandiamo agli articoli \cite{lach} (sezione 4) e
+ descrizione approfondita rimandiamo agli articoli \cite{lach} (sezione 4) e
  \cite{gutt} (sezioni 3.1, 3.4).
  
  \subsection{I requisiti di sicurezza}\label{requisitiSicurezza}
@@ -1263,16 +1272,17 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
    ricostruire i vecchi stati assunti dallo stato interno anche in assenza di
    nuova entropia;
    \item \textbf{backward security:} (detto anche \emph{break in recovery}) un
-   attaccante che conosca lo stato interno del generatore ad un dato istante non deve poter prevedere gli output futuri
-   del generatore se è stata introdotta una quantità sufficiente di entropia
-   dall'esterno.
+   attaccante che conosca lo stato interno del generatore ad un dato istante
+   non deve poter prevedere gli output futuri del generatore se è stata
+   introdotta una quantità sufficiente di entropia dall'esterno.
  \end{enumerate}
  Come viene fatto notare in \cite{lach} i requisiti 3 e 4 assumono che un
  attaccante conosca lo stato interno del generatore ad un dato istante, e
  prevedono che il sistema sia resiliente ad attacchi di tipo crottoanalitico;
  allo stesso tempo, gli autori osservano come sia difficile conoscere in
  pratica lo stato interno del generatore in quanto questo vive ed opera
- interamente nel kernel. 
+ interamente all'interno del kernel e non vi sono interfacce che ne consentano
+ la lettura in maniera diretta.
  
  
  \paragraph{}Nel seguito di questa sezione tratteremo i requisiti 2, 3 e 4 con
@@ -1282,9 +1292,9 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
  
  \subsection{Pseudorandomicità}
  Il requisito sulla pseudorandomicità considera il caso in cui l'attaccante
- conosca completamente o in parte le \emph{entropy sources}, per cui
- consideriamo il caso ancora peggiore della totale assenza di afflusso di
- entropia esterna.\\
+ conosca completamente o in parte le \emph{entropy sources}; di seguito
+ esaminiamo il suo soddisfacimento considerando il caso ancora peggiore della
+ totale assenza di afflusso di entropia esterna.\\
  Il LRNG applica un feedback al proprio stato interno ogni volta che viene
  estratto un output attraverso la \emph{mixing function} descritta in
  \ref{mixingfunction} . Lacharme \emph{et al.} affermano che non vi sia
@@ -1292,15 +1302,15 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
  (PRNG) siffatto, che possa fare a meno della conoscenza dello stato interno:
  questo vale in ragione del fatto che SHA-1 è una funzione crittografica a senso
  unico (o, come troviamo in letteratura, \emph{one-way}) e che dunque è teoricamente
- impossibile derivare informazione sullo stato interno a partire dagli output
- prodotti. L'operazione di \emph{folding} dei bytes estratti dalla \emph{pool}
- rispetto a quelli restituiti come output impedisce inoltre di risalire allo
- stesso hash prodotto da SHA-1.
+ impossibile derivare informazione sullo stato interno
+ a partire dagli output prodotti. L'operazione di \emph{folding} dei bytes
+ estratti dalla \emph{pool} rispetto a quelli restituiti come output impedisce
+ inoltre di risalire allo stesso hash prodotto da SHA-1.
  
  \subsection{Resilienza alla crittoanalisi}
  Come abbiamo anticipato, i requisiti di sicurezza 3 e 4 (visti in
  \ref{requisitiSicurezza}) assumono che l'attaccante abbia una conoscenza
- parziale o totale dello stato interno del generatore. Prima di analizzare come
+ parziale o totale dello stato interno del generatore. Prima di vedere come
  il LRNG implementi il \emph{forward} e \emph{backward recovery}, vogliamo
  analizzare velocemente in cosa consista tale conoscenza e quali siano gli
  scenari in cui si possa considerare una possibilità concreta.
@@ -1310,18 +1320,18 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
  ne consegue che quando parliamo di conoscenza dello stato interno ci riferiamo
  alla capacità di un osservatore esterno di conoscere i valori nei buffer di
  almeno una di esse. Abbiamo anche osservato in \ref{pool} come SHA-1 sia una
- protezione robusta affinché gli output non ``tradiscano" nulla sul
+ protezione robusta affinché gli output non ``tradiscano'' nulla sul
  contenuto informativo delle \emph{pool}. Per poter avere accesso ai buffer
  interni alle \emph{pool} è necessario pertanto che l'osservatore sia in una
  condizione (e posizione) particolarmente privilegiata (pensiamo ad esempio al
- caso di \emph{ring deprivileging} che si può avere nella virtualizzazione di un
- sistema operativo). 
+ caso di \emph{ring deprivileging} e \emph{ring compression} che si può avere
+ nella virtualizzazione di un sistema operativo). 
  
- \paragraph{} Per poter fare previsioni sugli output è necessario, in
- particolare, conoscere lo stato delle \emph{pool} di output \emph{blocking} e
- \emph{nonblocking}. Sappiamo però che queste sono tendenzialmente prive di
- entropia fino al momento in cui viene richiesto loro di produrre un buffer in
- output, ed anche in questo caso i bytes di entropia sono consumati all'istante:
+ \paragraph{} Per poter fare previsioni sugli output è necessario conoscere lo
+ stato delle \emph{pool} di output \emph{blocking} e \emph{nonblocking}.
+ Sappiamo però che queste sono tendenzialmente prive di entropia fino al
+ momento in cui viene richiesto loro di produrre un buffer in output, ed anche
+ in questo caso i bytes di entropia sono consumati all'istante:
  l'attaccante dovrebbe pertanto catturare lo stato del buffer interno della
  \emph{pool} tra il momento in cui avviene il reseeding con i bytes provenienti
  dall'\emph{input pool} (tramite \verb+xfer_secondary_pool()+
@@ -1330,27 +1340,28 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
  finestra sarebbe intutile a meno di possedere (e quindi aver catturato) anche
  l'hash estratto dalla \emph{input pool} da \verb+xfer_secondary_pool()+.
  Continuando questa ricerca a ritroso, troviamo che l'unico modo per poter fare
- delle previsioni, in modo deterministico, sugli output di almeno una fra le
- interfacce disponibili, occorre conoscere sia lo stato della rispettiva
- \emph{output pool} che quello della \emph{input pool}. Anche in questo caso un
- attaccante a conoscenza dello stato prima della generazione dell'output
- conoscerebbe anche lo stato successivo solo a meno dei 160 bit mischiati
- nuovamente alle \emph{pool} per il meccanismo di feedback: in assenza di
- ulteriori informazioni un attacco generico avrebbe un overhead di $O(2^{160})$
- e produrrebbe $2^{80}$ soluzioni (\cite{lach}). \\\\
+ delle previsioni, in modo quanto più possibile deterministico, sugli output di
+ almeno una fra le interfacce disponibili, occorre conoscere sia lo stato della
+ rispettiva \emph{output pool} che quello della \emph{input pool}. Anche in
+ questo caso un attaccante a conoscenza dello stato prima della generazione
+ dell'output potrebbe inferire lo stato successivo solo a meno dei 160 bit
+ mischiati nuovamente alle \emph{pool} per il meccanismo di feedback: in
+ assenza di ulteriori informazioni un attacco generico avrebbe un overhead di
+ $O(2^{160})$ e produrrebbe $2^{80}$ soluzioni (\cite{lach}). \\\\
  Possiamo quindi considerare che l'assunzione sulla conoscenza da parte di un
  attaccante dello stato interno, su cui si basano i due requisiti in esame, sia
  fortemente difficile da realizzare.
  
- \paragraph{Forward security:} Se un generatore di numeri pseudocasuali
- ogni volta che produce i propri output lo fa sia attraverso una funzione
- \emph{one-way} che adottando un meccanismo di feedback per aggiornare il
- proprio stato interno, allora si può considerare resistente al
- \emph{backtracking} (\cite{bark}) come richiesto dal requisito sul
- \emph{forward recovery}. Il LRNG implementa tale requisito utilizzando la
- primitiva SHA-1 per produrre l'hash su cui si basano il buffer restituito per
- output e i bytes per il feedback verso la \emph{pool} (sezione
- \ref{produzioneoutput}).
+ \paragraph{Forward security:} Secondo Elaine Barker e John Kelsey ( in 
+``\emph{Recommendation for random number generation using deterministic random
+bit generators}'' \cite{bark}), se un generatore di numeri pseudocasuali, ogni
+volta che produce i propri output, lo fa sia attraverso una funzione
+\emph{one-way} sia adottando un meccanismo di feedback per aggiornare il
+proprio stato interno, allora si può considerare resistente al
+\emph{backtracking}  come richiesto dal requisito sul \emph{forward recovery}.
+Il LRNG implementa tale requisito utilizzando la primitiva SHA-1 per produrre
+l'hash su cui si basano il buffer restituito per output e i bytes per il
+feedback verso la \emph{pool} (sezione \ref{produzioneoutput}).
  
  \paragraph{Backward security:} La \emph{backward security} è garantita soltanto
  se si è effettuato un reseeding opportuno dello stato interno tra due richieste
@@ -1361,9 +1372,6 @@ ma si distingue da essa per alcuni dettagli funzionali e implementativi:
  dichiarata per il LRNG è pari a 64 bit (\cite{lach}).
  
  
- 
- 
-
  
  \section{Cos'è cambiato?}
  Nella realizzazione del presente lavoro ci siamo imbattuti spesso nelle
@@ -1430,7 +1438,7 @@ $2^{128*32}-1$ per la \emph{input pool} e da meno di $2^{26*32}-1$ a $2^{32*32}-
  \begin{center}
  \emph{The 
  IRQF\textunderscore{}SAMPLE\textunderscore{}RANDOM flag is finally gone\\ from
- the kernel tree, only three years late.  :-)}
+ the kernel tree, only three years late. \Smiley{} }
  \end{center}
  
  \paragraph{}Il motivo alla base di questa sostituzione furono gli usi
@@ -1489,7 +1497,13 @@ which is impossible to audit is a BAD idea.﻿}»
  \ref{kerneloutput}), nelle architetture \verb+x86+ \emph{Intel onchips} viene
  in effetti fatto uso del generatore hardware presente nei chipset durante
  l'estrazione di un buffer di bytes randomici dalle \emph{pool} (la
- chiamata \verb+RDRAND+ corrisponde nel kernel a \verb+get_random()+).
+ chiamata \verb+RDRAND+ è implementata nelle architetture \emph{Intel} in
+ \verb+get_random()+).
+ L'incoerenza del commento al codice rispetto all'implementazione effettiva deve
+ aver tratto in inganno anche gli autori di \cite{lach}: a pagina 4, infatti,
+ affermano che nessun generatore hardware di numeri pseudocasuali è coinvolto
+ nella produzione di output del LRNG (``\emph{[\ldots]hardware RNGs \ldots are
+ not mixed into the Linux PRNG}'').\\
  Le nostre osservazioni pertanto confortano quanto affermato da Hornby.
  \paragraph{}L'hacking compiuto da Hornby però non sembra essere applicabile per
  le versioni del kernel successive alla 3.12.3 ma, come lui stesso afferma, è
@@ -1506,15 +1520,18 @@ which is impossible to audit is a BAD idea.﻿}»
  \cite{lach} sono concordi nella necessità di una documentazione del codice più
  approfondita sull'implementazione del LRNG. Soprattutto, abbiamo notato
  nel nostro lavoro come addirittura il commento di corredo al codice sorgente, oltre
- che carente di dettagli, sia in alcuni punti obsoleto. Il bisogno di una
- documentazione aggiornata è stata alla base della pubblicazione degli articoli
- sopra citati e, con necessaria e molta modestia, di questa nostra analisi, e si
- giustifica considerando la sensibilità degli scenari in cui il LRNG deve
- impiegato e l'affidabilità che conseguentemente gli viene richiesta.
+ che carente di dettagli, sia in alcuni punti obsoleto e non coerente rispetto
+ al codice stesso che si propongono di descrivere.
+ Il bisogno di una documentazione aggiornata è stata alla base della
+ pubblicazione degli articoli sopra citati e, con necessaria e molta modestia,
+ di questa nostra analisi, e si giustifica considerando la sensibilità degli
+ scenari in cui il LRNG deve impiegato e l'affidabilità che conseguentemente
+ gli viene richiesta.
  Le problematiche emerse di recente sulla possibile presenza di \emph{back door}
  nelgli stessi chipset utilizzati dal generatore impone un'analisi più
  approfondita e, a nostro avviso, la necessità di rimuovere l'uso
- di generatori hardware nell'implementazione del LRNG, ancora ad oggi presente.
+ di generatori hardware dalle routine per l'estrazione dei buffer dalle
+ \emph{pool} del LRNG, ancora ad oggi presente.
  
  
  

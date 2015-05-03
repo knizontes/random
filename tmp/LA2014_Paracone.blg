@@ -11,24 +11,24 @@ Name 1 in "Patrick Lacharme, Andrea Röck, Vincent Strubel, and Marion Videau" h
 while executing---line 1250 of file alpha.bst
 You've used 11 entries,
             2543 wiz_defined-function locations,
-            598 strings with 6012 characters,
-and the built_in function-call counts, 3220 in all, are:
-= -- 305
-> -- 154
-< -- 5
-+ -- 47
-- -- 46
-* -- 165
-:= -- 543
+            598 strings with 5969 characters,
+and the built_in function-call counts, 3162 in all, are:
+= -- 299
+> -- 143
+< -- 6
++ -- 43
+- -- 42
+* -- 159
+:= -- 531
 add.period$ -- 25
 call.type$ -- 11
-change.case$ -- 54
+change.case$ -- 53
 chr.to.int$ -- 10
 cite$ -- 11
-duplicate$ -- 124
+duplicate$ -- 125
 empty$ -- 261
-format.name$ -- 62
-if$ -- 663
+format.name$ -- 59
+if$ -- 652
 int.to.chr$ -- 2
 int.to.str$ -- 0
 missing$ -- 3
@@ -36,18 +36,18 @@ newline$ -- 50
 num.names$ -- 33
 pop$ -- 95
 preamble$ -- 1
-purify$ -- 72
+purify$ -- 71
 quote$ -- 0
-skip$ -- 133
+skip$ -- 131
 stack$ -- 0
 substring$ -- 77
 swap$ -- 11
-text.length$ -- 5
-text.prefix$ -- 5
+text.length$ -- 6
+text.prefix$ -- 6
 top$ -- 0
 type$ -- 88
 warning$ -- 0
-while$ -- 28
+while$ -- 27
 width$ -- 13
 write$ -- 118
 (There were 3 error messages)
