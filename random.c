@@ -371,12 +371,9 @@ static int random_min_urandom_seed = 60;
  * irreducible, which we have made here.
  */
 static struct poolinfo {
-	/*
-	 * poolfracbits contiene il numero di parole della pool moltiplicato per 2^8 (256)
-	 * è la dimensione della pool in bit, pari a 32 bytes per parola (nel caso ENTROPY_SHIFT=3).
-	 *
+	/*	 *
 	 * poolfracbits rappresenta il numero di frazionali di bit, di dimensione
-	 * 2^(-ENTROPY_SHIFT-5), di cui è composta la pool.
+	 * 2^(-ENTROPY_SHIFT), di cui è composta la pool.
 	 *
 	 * x<<5 è il numero di bit interi della pool, ovvero il numero di parole della pool
 	 * moltiplicato per 32 bit- 4 byte

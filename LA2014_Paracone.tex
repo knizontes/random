@@ -794,7 +794,9 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
  definizione dei polinomi nella struttura \verb+poolinfo+ e dall'implementazione
  del LFSR nella routine \verb+_mix_pool_bytes()+. 
  \newline \verb+_mix_pool_bytes()+ per ogni byte del buffer in input, esegue le
- operazioni:
+ operazioni:\\
+        \centerline{\includegraphics[width=150mm]{img/mixing_function1.png}} 
+ 
  \begin{enumerate}
    \item viene prelevato il byte corrente assieme ai 3 byte che lo seguono.
    Otteniamo una parola $w$ di 4 bytes che viene ruotata del numero
@@ -811,7 +813,9 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
    a causa dell'addendo $-1$ in $P(X)-1$); tale operazione viene applicata 
    $\forall\ tap_j \in \left\{128, 104, 76, 51, 25, 1 \right\}$ nel caso della
    \emph{input pool} ($\forall tap_j \in \left\{32, 26, 19, 14, 7, 1 \right\}$
-   nel caso delle \emph{output pool}).
+   nel caso delle \emph{output pool}).\\
+           \centerline{\includegraphics[width=150mm]{img/mixing_function2.png}} 
+   
    \item viene aggiornata l'i-esima parola della pool con 
    $\alpha^3\left(P(X)-1\right)-1$:
    \begin{center}
@@ -830,7 +834,6 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
    perché sono quelli che sono stati letti meno di recente.
  \end{enumerate}
  \begin{center}
- [IMMAGINE MIXING FUNCTION]
  \end{center}
  
  \paragraph{}I polinomi caratteristici attuali sono costruiti in modo da
@@ -839,10 +842,9 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
  primitività del polinomio di feedback $Q(X)=\alpha^3(P(X)-1)+1$.
  L'attuale versione del LRNG accoglie le modifiche ai polinomi caratteristici
  $P(X)$ delle pool suggerite nell'articolo di Lachman et al. \cite{lach}
- affinché sia garantita la primitività di $Q(X)$. 
- \newline Per una descrizione più approfondita, rimandiamo il lettore alla
- sezione \ref{mixingfunctionchanges} sulla storia di alcuni cambiamenti del
- codice.
+ affinché sia garantita la primitività di $Q(X)$; nella sezione
+ \ref{mixingfunctionchanges} rendiamo conto di dette modifiche e dei
+ miglioramenti che hanno introdotto.
  
  \section{L'Output}
  La produzione degli output necessita di un meccanismo per l'estrazione
@@ -890,10 +892,12 @@ vincoli sugli \emph{entropy input}, individuati nell'articolo di Lacharme
  dell'entropia, implementata dalla routine
  \verb+extract_buf()+, troviamo la procedura seguente:
  \begin{enumerate}
-   \item inzializza un buffer $w$ di 5 parole a 32 bit;
+   \item inzializza un buffer \verb+w+ di 5 parole a 32 bit (ricordiamo che le
+   parole delle \emph{pool} sono valori senza segno di 32 bit);
    \item applica, per un numero di volte dipendente dalla \emph{pool} (2 per le
    \emph{output pool} e 8 per l'\emph{input pool})  l'hash di SHA-1 ai 512 bit
-   della pool che iniziano con la parola in posizione $i$, utilizzando $w$ come
+   della pool che iniziano con la parola in posizione $i$ (ovvero coinvolgendo
+   anche le 15 parole che seguono l'$i$-esima), utilizzando \verb+w+ come
    digest:
    \begin{center}
    $pool\left[i\right]_{512}\leftarrow f_{SHA-1}(w, pool\left[i\right]_{512})$
